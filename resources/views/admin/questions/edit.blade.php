@@ -7,7 +7,7 @@
                 </svg>
             </a>
             <h2 class="font-bold text-2xl text-gray-800 leading-tight">
-                {{ __('Add New Question') }}
+                {{ __('Edit Question #' . $question->id) }}
             </h2>
         </div>
     </x-slot>
@@ -36,19 +36,20 @@
                     </div>
                 @endif
 
-                <form action="{{ route('admin.questions.store') }}" method="POST" class="space-y-6">
+                <form action="{{ route('admin.questions.update', $question) }}" method="POST" class="space-y-6">
                     @csrf
+                    @method('PUT')
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Primary Subcategory -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Primary Subcategory <span class="text-red-500">*</span></label>
                             <select name="primary_subcategory_id" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5" required>
-                                <option value="" disabled selected>Select Primary Subcategory...</option>
+                                <option value="" disabled>Select Primary Subcategory...</option>
                                 @foreach($categories as $category)
                                     <optgroup label="{{ ucfirst($category->name) }}">
                                         @foreach($category->subcategories as $sub)
-                                            <option value="{{ $sub->id }}" {{ old('primary_subcategory_id') == $sub->id ? 'selected' : '' }}>
+                                            <option value="{{ $sub->id }}" {{ old('primary_subcategory_id', $question->primary_subcategory_id) == $sub->id ? 'selected' : '' }}>
                                                 {{ $sub->name }}
                                             </option>
                                         @endforeach
@@ -66,7 +67,7 @@
                                 @foreach($categories as $category)
                                     <optgroup label="{{ ucfirst($category->name) }}">
                                         @foreach($category->subcategories as $sub)
-                                            <option value="{{ $sub->id }}" {{ old('secondary_subcategory_id') == $sub->id ? 'selected' : '' }}>
+                                            <option value="{{ $sub->id }}" {{ old('secondary_subcategory_id', $question->secondary_subcategory_id) == $sub->id ? 'selected' : '' }}>
                                                 {{ $sub->name }}
                                             </option>
                                         @endforeach
@@ -82,18 +83,18 @@
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Question Type <span class="text-red-500">*</span></label>
                             <select id="question_type" name="question_type" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5" required>
-                                <option value="singleselect" {{ old('question_type') == 'singleselect' ? 'selected' : '' }}>Single Select</option>
-                                <option value="multiselect" {{ old('question_type', 'multiselect') == 'multiselect' ? 'selected' : '' }}>Multi-Select</option>
-                                <option value="dropdown" {{ old('question_type') == 'dropdown' ? 'selected' : '' }}>Dropdown</option>
-                                <option value="drag_and_drop" {{ old('question_type') == 'drag_and_drop' ? 'selected' : '' }}>Drag & Drop</option>
-                                <option value="truefalse" {{ old('question_type') == 'truefalse' ? 'selected' : '' }}>True/False</option>
+                                <option value="singleselect" {{ old('question_type', $question->question_type) == 'singleselect' ? 'selected' : '' }}>Single Select</option>
+                                <option value="multiselect" {{ old('question_type', $question->question_type) == 'multiselect' ? 'selected' : '' }}>Multi-Select</option>
+                                <option value="dropdown" {{ old('question_type', $question->question_type) == 'dropdown' ? 'selected' : '' }}>Dropdown</option>
+                                <option value="drag_and_drop" {{ old('question_type', $question->question_type) == 'drag_and_drop' ? 'selected' : '' }}>Drag & Drop</option>
+                                <option value="truefalse" {{ old('question_type', $question->question_type) == 'truefalse' ? 'selected' : '' }}>True/False</option>
                             </select>
                         </div>
 
                         <!-- Correct Answer String -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Correct Answer String <span class="text-red-500">*</span></label>
-                            <input type="text" name="correct_answer_string" value="{{ old('correct_answer_string') }}" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5" placeholder="e.g. A, B or True or DDL:Data Definition Language" required>
+                            <input type="text" name="correct_answer_string" value="{{ old('correct_answer_string', $question->correct_answer_string) }}" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5" placeholder="e.g. A, B or True or DDL:Data Definition Language" required>
                             <p class="mt-1 text-xs text-gray-500">The exact correct answer(s). Format depends on the question type. Keep this outside of the XML content.</p>
                         </div>
                     </div>
@@ -102,7 +103,7 @@
                         <!-- XML Content Textarea -->
                         <div class="lg:col-span-2">
                             <label class="block text-sm font-semibold text-gray-700 mb-2">XML Content <span class="text-red-500">*</span></label>
-                            <textarea id="xml_content" name="xml_content" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 font-mono text-sm p-3 h-96" placeholder="<question>...</question>" required>{{ old('xml_content') }}</textarea>
+                            <textarea id="xml_content" name="xml_content" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 font-mono text-sm p-3 h-96" placeholder="<question>...</question>" required>{{ old('xml_content', $question->xml_content) }}</textarea>
                             <p class="mt-2 text-xs text-gray-500">Write XML syntax defining text and choice options. You can insert base64 images directly as &lt;img src="data:image/png;base64,..."&gt; inside the XML content, and they will be automatically parsed and saved.</p>
                         </div>
 
@@ -143,7 +144,7 @@
                             Cancel
                         </a>
                         <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition">
-                            Save Question
+                            Save Changes
                         </button>
                     </div>
                 </form>

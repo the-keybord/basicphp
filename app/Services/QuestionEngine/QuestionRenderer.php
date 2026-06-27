@@ -13,13 +13,16 @@ class QuestionRenderer
 
     public function render(array $question): array
     {
-        $question['text'] =
-            $this->images->render($question['text']);
+        $question['text'] = $this->images->render($question['text']);
 
-        $question['options'] =
-            collect($question['options'])
-                ->map(fn($o) => $this->images->render($o))
-                ->toArray();
+        $question['options'] = collect($question['options'])
+            ->map(function ($o) {
+                if (is_array($o)) {
+                    return collect($o)->map(fn($val) => $this->images->render($val))->toArray();
+                }
+                return $this->images->render($o);
+            })
+            ->toArray();
 
         return $question;
     }
