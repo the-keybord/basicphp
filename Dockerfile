@@ -1,34 +1,18 @@
-FROM php:8.2-fpm
-
-WORKDIR /var/www
-
-# System deps
+# 1. Install system dependencies required by Composer
 RUN apt-get update && apt-get install -y \
     git \
-    curl \
     unzip \
-    zip \
     libzip-dev \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev
+    && docker-php-ext-install zip
 
-# PHP extensions
-RUN docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl
+# 2. Copy ONLY the composer files first (this caches the dependency layer)
+COPY composer.json composer.lock ./
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# 3. Run composer install
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Copy project
+# 4. Copy the rest of the application code
 COPY . .
 
-# Install dependencies
-RUN composer install --no-dev --optimize-autoloader
-
-# Laravel permissions
-RUN chown -R www-data:www-data /var/www \
-    && chmod -R 775 storage bootstrap/cache
-
-EXPOSE 8000
-
-CMD php artisan serve --host=0.0.0.0 --port=8000
+# 5. Run Composer scripts/autoloader optimization again now that code is present
+RUN composer dump-autoload --optimize
