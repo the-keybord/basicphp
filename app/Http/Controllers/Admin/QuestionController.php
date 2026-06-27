@@ -6,6 +6,8 @@ use App\Models\Question;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Services\QuestionEngine\QuestionParser;
+use App\Services\QuestionEngine\QuestionRenderer;
 
 class QuestionController extends Controller
 {
@@ -66,4 +68,15 @@ class QuestionController extends Controller
         return redirect()->route('admin.questions.index')
             ->with('success', 'Question added successfully! Any embedded images were extracted and saved safely.');
     }
+
+    public function preview(Question $question)
+{
+    $parser = new QuestionParser();
+    $renderer = new QuestionRenderer();
+
+    $parsed = $parser->parse($question->xml_content);
+    $parsed = $renderer->render($parsed);
+
+    return view('questions.preview', compact('parsed', 'question'));
+}
 }

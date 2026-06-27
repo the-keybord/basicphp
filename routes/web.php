@@ -19,9 +19,10 @@ Route::middleware('auth')->group(function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
     Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/questions', [QuestionController::class, 'index'])->name('questions.index');
-    Route::get('/questions/create', [QuestionController::class, 'create'])->name('questions.create');
-    Route::post('/questions', [QuestionController::class, 'store'])->name('questions.store');
+    Route::resource('questions', QuestionController::class);
+
+    Route::get('questions/{question}/preview', [QuestionController::class, 'preview'])
+        ->name('questions.preview');
 });
 
 
