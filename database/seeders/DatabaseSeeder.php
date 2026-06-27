@@ -19,9 +19,11 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         User::factory()->create([
-        'name' => 'Admin',
-        'email' => 'admin@zece.info', // Change this to your preferred login email
-        'password' => Hash::make('your_secure_password'), // Change this
-    ]);
+            'name' => 'Admin',
+            'email' => 'admin@zece.info', // Change this to your preferred login email
+            'password' => Hash::make('your_secure_password'), // Change this
+        ]);
+
+        $this->call(QuestionSeeder::class);
     }
 }

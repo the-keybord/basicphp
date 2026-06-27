@@ -69,6 +69,16 @@
                     <div class="text-xl font-medium text-gray-800 leading-relaxed">
                         {!! $parsed['text'] !!}
                     </div>
+
+                    <!-- Question Image (if any) -->
+                    @if(!empty($parsed['image']))
+                        <div class="mt-4">
+                            @php
+                                $imageUrl = str_starts_with($parsed['image'], 'http') ? $parsed['image'] : asset($parsed['image']);
+                            @endphp
+                            <img src="{{ $imageUrl }}" class="rounded-xl border border-gray-150 max-w-full shadow-sm" alt="Question diagram">
+                        </div>
+                    @endif
                 </div>
 
                 <div class="p-8">
@@ -98,27 +108,63 @@
 
                     <!-- DROPDOWN -->
                     @elseif($question->question_type === 'dropdown')
-                        <div class="max-w-md">
-                            <select class="block w-full border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 p-4 text-gray-700 font-medium bg-white">
-                                <option value="" disabled selected>Choose your answer...</option>
-                                @foreach($parsed['options'] as $option)
-                                    <option>{!! strip_tags($option) !!}</option>
+                        @if(!empty($parsed['subjects']))
+                            <div class="space-y-4">
+                                @foreach($parsed['subjects'] as $sIndex => $subOptions)
+                                    <div class="max-w-md">
+                                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">Dropdown #{{ $sIndex + 1 }}</label>
+                                        <select class="block w-full border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 p-4 text-gray-700 font-medium bg-white">
+                                            <option value="" disabled selected>Choose your answer...</option>
+                                            @foreach($subOptions as $option)
+                                                <option>{!! strip_tags($option) !!}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 @endforeach
-                            </select>
-                        </div>
+                            </div>
+                        @else
+                            <div class="max-w-md">
+                                <select class="block w-full border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 p-4 text-gray-700 font-medium bg-white">
+                                    <option value="" disabled selected>Choose your answer...</option>
+                                    @foreach($parsed['options'] as $option)
+                                        <option>{!! strip_tags($option) !!}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
 
                     <!-- TRUE/FALSE -->
                     @elseif($question->question_type === 'truefalse')
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <label class="flex flex-col items-center justify-center p-6 border border-gray-200 hover:border-teal-400 rounded-xl hover:bg-teal-50/20 cursor-pointer transition duration-150 group">
-                                <input type="radio" name="tf" value="true" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500">
-                                <span class="mt-2 text-lg font-bold text-gray-700 group-hover:text-gray-900">True</span>
-                            </label>
-                            <label class="flex flex-col items-center justify-center p-6 border border-gray-200 hover:border-teal-400 rounded-xl hover:bg-teal-50/20 cursor-pointer transition duration-150 group">
-                                <input type="radio" name="tf" value="false" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500">
-                                <span class="mt-2 text-lg font-bold text-gray-700 group-hover:text-gray-900">False</span>
-                            </label>
-                        </div>
+                        @if(!empty($parsed['subjects']))
+                            <div class="space-y-4">
+                                @foreach($parsed['subjects'] as $sIndex => $subject)
+                                    <div class="flex flex-col md:flex-row md:items-center justify-between p-4 border border-gray-200 rounded-xl bg-gray-50/50 gap-4">
+                                        <div class="text-gray-700 font-medium">{!! $subject !!}</div>
+                                        <div class="flex space-x-2">
+                                            <label class="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-white cursor-pointer select-none transition">
+                                                <input type="radio" name="matrix_{{ $sIndex }}" value="yes" class="w-4 h-4 text-teal-600 focus:ring-teal-500">
+                                                <span class="ml-2 text-sm font-semibold text-gray-700">Yes</span>
+                                            </label>
+                                            <label class="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-white cursor-pointer select-none transition">
+                                                <input type="radio" name="matrix_{{ $sIndex }}" value="no" class="w-4 h-4 text-red-600 focus:ring-red-500">
+                                                <span class="ml-2 text-sm font-semibold text-gray-700">No</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <label class="flex flex-col items-center justify-center p-6 border border-gray-200 hover:border-teal-400 rounded-xl hover:bg-teal-50/20 cursor-pointer transition duration-150 group">
+                                    <input type="radio" name="tf" value="true" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500">
+                                    <span class="mt-2 text-lg font-bold text-gray-700 group-hover:text-gray-900">True</span>
+                                </label>
+                                <label class="flex flex-col items-center justify-center p-6 border border-gray-200 hover:border-teal-400 rounded-xl hover:bg-teal-50/20 cursor-pointer transition duration-150 group">
+                                    <input type="radio" name="tf" value="false" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500">
+                                    <span class="mt-2 text-lg font-bold text-gray-700 group-hover:text-gray-900">False</span>
+                                </label>
+                            </div>
+                        @endif
 
                     <!-- DRAG AND DROP (MATCHING PAIRS / REORDERING) -->
                     @elseif($question->question_type === 'drag_and_drop')

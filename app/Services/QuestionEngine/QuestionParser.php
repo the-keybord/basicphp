@@ -44,9 +44,48 @@ class QuestionParser
             }
         }
 
+        // Support for yesno/matrix question subjects
+        $subjects = [];
+        if (isset($question->subjects->subject)) {
+            foreach ($question->subjects->subject as $sub) {
+                if ($sub->children()->count() > 0) {
+                    $subOpts = [];
+                    foreach ($sub->children() as $child) {
+                        $subOpts[] = trim((string)$child);
+                    }
+                    $subjects[] = $subOpts;
+                } else {
+                    $subjects[] = trim((string)$sub);
+                }
+            }
+        } elseif (isset($question->subject)) {
+            foreach ($question->subject as $sub) {
+                if ($sub->children()->count() > 0) {
+                    $subOpts = [];
+                    foreach ($sub->children() as $child) {
+                        $subOpts[] = trim((string)$child);
+                    }
+                    $subjects[] = $subOpts;
+                } else {
+                    $subjects[] = trim((string)$sub);
+                }
+            }
+        }
+
+        // Support for extracting primary image tag
+        $image = '';
+        if (isset($question->image)) {
+            $imgVal = trim((string)$question->image);
+            if (!empty($imgVal) && strtolower($imgVal) !== 'url') {
+                $image = $imgVal;
+            }
+        }
+
         return [
             'text' => $text,
             'options' => $options,
+            'subjects' => $subjects,
+            'image' => $image,
         ];
     }
 }

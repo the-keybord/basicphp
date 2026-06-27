@@ -24,6 +24,15 @@ class QuestionRenderer
             })
             ->toArray();
 
+        $question['subjects'] = collect($question['subjects'] ?? [])
+            ->map(function ($s) {
+                if (is_array($s)) {
+                    return collect($s)->map(fn($val) => $this->images->render($val))->toArray();
+                }
+                return $this->images->render($s);
+            })
+            ->toArray();
+
         return $question;
     }
 }
