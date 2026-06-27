@@ -10,7 +10,8 @@ class ImageRenderer
             "/@img\('([^']+)'\)/",
             function ($matches) {
 
-                $url = asset('storage/questions/' . $matches[1]);
+                $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
+                $url = \Illuminate\Support\Facades\Storage::disk($disk)->url('questions/' . $matches[1]);
 
                 return "<img src=\"$url\" class=\"rounded my-3 max-w-full\">";
             },

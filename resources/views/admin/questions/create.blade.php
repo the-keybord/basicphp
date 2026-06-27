@@ -100,29 +100,41 @@
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <!-- XML Content Textarea -->
-                        <div class="lg:col-span-2">
-                            <div class="flex items-center justify-between mb-2">
-                                <label class="block text-sm font-semibold text-gray-700">XML Content <span class="text-red-500">*</span></label>
-                                <div class="flex items-center space-x-2">
-                                    <button type="button" onclick="document.getElementById('image_upload_input').click()" class="inline-flex items-center px-3 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-700 text-xs font-semibold rounded-lg shadow-sm transition">
-                                        <svg class="w-4 h-4 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                        </svg>
-                                        Insert Image (Drop / Paste / Select)
-                                    </button>
-                                    <input type="file" id="image_upload_input" class="hidden" accept="image/*" onchange="handleImageFileSelect(this)">
-                                </div>
-                            </div>
+                        <div class="lg:col-span-2 space-y-2">
+                            <label class="block text-sm font-semibold text-gray-700">XML Content <span class="text-red-500">*</span></label>
                             <textarea id="xml_content" name="xml_content" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 font-mono text-sm p-3 h-96 transition duration-150" placeholder="<question>...</question>" required>{{ old('xml_content') }}</textarea>
-                            <p class="mt-2 text-xs text-gray-500">Write XML syntax defining text and choice options. You can drag and drop images, paste them from clipboard, or click 'Insert Image' above. They will be added as tags and saved on the server automatically.</p>
+                            <p class="mt-2 text-xs text-gray-500">Write XML syntax defining text and choice options. You can insert images by dragging them into the uploader panel on the right or pasting them directly anywhere.</p>
                         </div>
 
-                        <!-- Interactive Help Panel -->
-                        <div class="bg-gray-50 border border-gray-150 rounded-xl p-5 flex flex-col justify-between">
-                            <div>
-                                <h4 class="font-bold text-sm text-gray-800 uppercase tracking-wider mb-3">XML Code Templates</h4>
-                                <p class="text-xs text-gray-600 mb-4">Click below to copy/load the syntax template for your chosen question type.</p>
+                        <!-- Side Utilities Panel -->
+                        <div class="space-y-6">
+                            <!-- Image Uploader Panel -->
+                            <div class="bg-gray-50 border border-gray-150 rounded-xl p-5 space-y-4">
+                                <h4 class="font-bold text-sm text-gray-800 uppercase tracking-wider">Image Uploader</h4>
+                                <p class="text-xs text-gray-500">Upload images to storage, then insert them anywhere inside the question XML.</p>
                                 
+                                <!-- Drag and Drop Box -->
+                                <div id="image-drop-zone" class="border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50/30 rounded-xl p-6 text-center cursor-pointer transition select-none">
+                                    <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                    </svg>
+                                    <span class="text-xs font-bold text-gray-700 block">Drag & drop or paste image</span>
+                                    <span class="text-xxs text-gray-400 mt-1 block">Or click to select image file</span>
+                                </div>
+                                <input type="file" id="image-upload-field" class="hidden" accept="image/*" onchange="uploadImageFiles(this.files)">
+
+                                <!-- Uploaded Images List -->
+                                <div id="uploaded-images-library" class="hidden space-y-2">
+                                    <h5 class="font-bold text-xs text-gray-500 uppercase tracking-wide">Uploaded Images</h5>
+                                    <div id="images-container" class="grid grid-cols-2 gap-2">
+                                        <!-- Thumbnails inserted here -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Interactive Help Panel -->
+                            <div class="bg-gray-50 border border-gray-150 rounded-xl p-5 space-y-3">
+                                <h4 class="font-bold text-sm text-gray-800 uppercase tracking-wider">XML Templates</h4>
                                 <div class="space-y-2">
                                     <button type="button" onclick="loadTemplate('singleselect')" class="w-full text-left bg-white hover:bg-indigo-50 border border-gray-200 text-xs font-semibold py-2 px-3 rounded-lg text-indigo-700 transition">
                                         Single Select Template
@@ -141,11 +153,6 @@
                                     </button>
                                 </div>
                             </div>
-
-                            <div class="mt-6 pt-4 border-t border-gray-200">
-                                <h5 class="font-semibold text-xs text-gray-700 mb-1">Image Reference Shortcut</h5>
-                                <p class="text-xs text-gray-500">Insert custom images in question text or option tags via the asset shortcut format: <code class="bg-gray-200 px-1 py-0.5 rounded font-mono font-bold text-gray-800">@img('filename.png')</code></p>
-                            </div>
                         </div>
                     </div>
 
@@ -163,7 +170,7 @@
         </div>
     </div>
 
-    <!-- JS for dynamic XML templating and image uploading -->
+    <!-- JS for dynamic XML templating and AJAX image uploading -->
     <script>
         const templates = {
             singleselect: `<question>\n    <text>What is the default port for PostgreSQL databases?</text>\n    <option>3306</option>\n    <option>5432</option>\n    <option>1433</option>\n    <option>1521</option>\n</question>`,
@@ -181,69 +188,117 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const textarea = document.getElementById('xml_content');
+            const dropzone = document.getElementById('image-drop-zone');
+            const fileInput = document.getElementById('image-upload-field');
 
-            // Drag and drop handlers
+            // Trigger file dialog
+            dropzone.addEventListener('click', () => fileInput.click());
+
+            // Drag and drop events
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                textarea.addEventListener(eventName, (e) => {
+                dropzone.addEventListener(eventName, (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                 }, false);
             });
 
             ['dragenter', 'dragover'].forEach(eventName => {
-                textarea.addEventListener(eventName, () => {
-                    textarea.classList.add('border-blue-500', 'bg-blue-50/10', 'ring-2', 'ring-blue-200');
+                dropzone.addEventListener(eventName, () => {
+                    dropzone.classList.add('border-blue-500', 'bg-blue-50/50');
                 }, false);
             });
 
             ['dragleave', 'drop'].forEach(eventName => {
-                textarea.addEventListener(eventName, () => {
-                    textarea.classList.remove('border-blue-500', 'bg-blue-50/10', 'ring-2', 'ring-blue-200');
+                dropzone.addEventListener(eventName, () => {
+                    dropzone.classList.remove('border-blue-500', 'bg-blue-50/50');
                 }, false);
             });
 
-            textarea.addEventListener('drop', (e) => {
+            dropzone.addEventListener('drop', (e) => {
                 const dt = e.dataTransfer;
                 if (dt.files && dt.files.length) {
-                    handleImageFiles(dt.files);
+                    uploadImageFiles(dt.files);
                 }
             });
 
             // Clipboard Paste handler
-            textarea.addEventListener('paste', (e) => {
+            window.addEventListener('paste', (e) => {
                 const items = (e.clipboardData || e.originalEvent.clipboardData).items;
                 for (let index in items) {
                     const item = items[index];
                     if (item.kind === 'file' && item.type.startsWith('image/')) {
                         const blob = item.getAsFile();
-                        handleImageFiles([blob]);
+                        uploadImageFiles([blob]);
                     }
                 }
             });
         });
 
-        function handleImageFileSelect(input) {
-            if (input.files && input.files.length) {
-                handleImageFiles(input.files);
-                input.value = ''; // Clear input selection
-            }
-        }
+        function uploadImageFiles(files) {
+            const container = document.getElementById('images-container');
+            document.getElementById('uploaded-images-library').classList.remove('hidden');
 
-        function handleImageFiles(files) {
-            const textarea = document.getElementById('xml_content');
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 if (!file.type.startsWith('image/')) continue;
 
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const base64Data = event.target.result;
-                    const imgTag = `<img src="${base64Data}" />`;
-                    insertAtCursor(textarea, imgTag);
-                };
-                reader.readAsDataURL(file);
+                const tempId = 'temp-' + Date.now() + '-' + i;
+                const tempCard = document.createElement('div');
+                tempCard.id = tempId;
+                tempCard.className = 'relative border border-gray-200 rounded-lg p-2 bg-white flex flex-col items-center justify-center h-20 overflow-hidden';
+                tempCard.innerHTML = `
+                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                    <span class="text-xxs text-gray-500 mt-1 truncate max-w-full px-1">${file.name}</span>
+                `;
+                container.appendChild(tempCard);
+
+                const formData = new FormData();
+                formData.append('image', file);
+
+                fetch("{{ route('admin.questions.upload-image') }}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Upload failed');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        const card = document.getElementById(tempId);
+                        card.className = 'relative border border-gray-200 rounded-lg p-1 bg-white hover:shadow-sm transition flex flex-col group';
+                        card.innerHTML = `
+                            <div class="h-12 w-full rounded overflow-hidden bg-gray-100 flex items-center justify-center relative">
+                                <img src="${data.url}" class="h-full object-cover">
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
+                                    <button type="button" onclick="insertImageToken('${data.filename}')" class="bg-blue-600 hover:bg-blue-700 text-white text-xxs font-bold py-0.5 px-1.5 rounded shadow transition">
+                                        Insert
+                                    </button>
+                                </div>
+                            </div>
+                            <span class="text-xxs text-gray-400 truncate max-w-full text-center mt-1 select-all font-mono" title="${data.filename}">${data.filename}</span>
+                        `;
+                    } else {
+                        throw new Error(data.message || 'Upload failed');
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    const card = document.getElementById(tempId);
+                    card.innerHTML = `<span class="text-red-500 text-xxs font-bold">Error</span>`;
+                    setTimeout(() => card.remove(), 3000);
+                });
             }
+        }
+
+        function insertImageToken(filename) {
+            const textarea = document.getElementById('xml_content');
+            const token = `@img('${filename}')`;
+            insertAtCursor(textarea, token);
         }
 
         function insertAtCursor(myField, myValue) {

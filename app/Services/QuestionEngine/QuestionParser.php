@@ -30,8 +30,16 @@ class QuestionParser
         }
 
         $options = [];
-        if (isset($question->option)) {
-            foreach ($question->option as $option) {
+        $optionElements = null;
+
+        if (isset($question->options->option)) {
+            $optionElements = $question->options->option;
+        } elseif (isset($question->option)) {
+            $optionElements = $question->option;
+        }
+
+        if ($optionElements) {
+            foreach ($optionElements as $option) {
                 if ($option->children()->count() > 0) {
                     $optArray = [];
                     foreach ($option->children() as $child) {

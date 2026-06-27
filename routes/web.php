@@ -24,6 +24,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('questions', QuestionController::class);
         Route::get('questions/{question}/preview', [QuestionController::class, 'preview'])
             ->name('questions.preview');
+        Route::post('questions/upload-image', [QuestionController::class, 'uploadImage'])
+            ->name('questions.upload-image');
 
         Route::resource('tests', TestController::class);
         Route::get('tests/{test}/preview', [TestController::class, 'preview'])

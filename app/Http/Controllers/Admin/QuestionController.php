@@ -111,11 +111,31 @@ class QuestionController extends Controller
                 return $matches[0]; // fallback if decoding fails
             }
 
+            $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
             $filename = 'questions/' . Str::uuid() . '.' . $extension;
-            Storage::disk('public')->put($filename, $imageBinary);
+            Storage::disk($disk)->put($filename, $imageBinary);
 
-            $publicUrl = Storage::url($filename);
+            $publicUrl = Storage::disk($disk)->url($filename);
             return 'src="' . $publicUrl . '"';
         }, $xmlContent);
+    }
+
+    public function uploadImage(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
+            $path = $request->file('image')->store('questions', $disk);
+            return response()->json([
+                'success' => true,
+                'url' => Storage::disk($disk)->url($path),
+                'filename' => basename($path),
+            ]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'No file uploaded'], 400);
     }
 }

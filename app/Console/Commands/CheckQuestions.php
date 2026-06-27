@@ -25,6 +25,13 @@ class CheckQuestions extends Command
             try {
                 $parsed = $parser->parse($q->xml_content);
                 $renderer->render($parsed);
+
+                if (in_array($q->question_type, ['singleselect', 'multiselect', 'dropdown'])) {
+                    if (empty($parsed['options']) && empty($parsed['subjects'])) {
+                        throw new \Exception("Parsed options and subjects are both empty!");
+                    }
+                }
+
                 $this->line("Question ID {$q->id} [{$q->question_type}]: OK");
             } catch (\Exception $e) {
                 $this->error("Question ID {$q->id} [{$q->question_type}] FAILED: " . $e->getMessage());
