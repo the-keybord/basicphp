@@ -581,7 +581,7 @@ class QuestionSeeder extends Seeder
 </question>'
             ],
             [
-                'type' => 'design',
+                'type' => 'singleselect',
                 'sub' => $subcategories['design'],
                 'answer' => 'foreign key',
                 'xml' => '<question>

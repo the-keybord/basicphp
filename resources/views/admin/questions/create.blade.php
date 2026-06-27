@@ -101,9 +101,20 @@
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <!-- XML Content Textarea -->
                         <div class="lg:col-span-2">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">XML Content <span class="text-red-500">*</span></label>
-                            <textarea id="xml_content" name="xml_content" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 font-mono text-sm p-3 h-96" placeholder="<question>...</question>" required>{{ old('xml_content') }}</textarea>
-                            <p class="mt-2 text-xs text-gray-500">Write XML syntax defining text and choice options. You can insert base64 images directly as &lt;img src="data:image/png;base64,..."&gt; inside the XML content, and they will be automatically parsed and saved.</p>
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="block text-sm font-semibold text-gray-700">XML Content <span class="text-red-500">*</span></label>
+                                <div class="flex items-center space-x-2">
+                                    <button type="button" onclick="document.getElementById('image_upload_input').click()" class="inline-flex items-center px-3 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-700 text-xs font-semibold rounded-lg shadow-sm transition">
+                                        <svg class="w-4 h-4 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                        Insert Image (Drop / Paste / Select)
+                                    </button>
+                                    <input type="file" id="image_upload_input" class="hidden" accept="image/*" onchange="handleImageFileSelect(this)">
+                                </div>
+                            </div>
+                            <textarea id="xml_content" name="xml_content" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 font-mono text-sm p-3 h-96 transition duration-150" placeholder="<question>...</question>" required>{{ old('xml_content') }}</textarea>
+                            <p class="mt-2 text-xs text-gray-500">Write XML syntax defining text and choice options. You can drag and drop images, paste them from clipboard, or click 'Insert Image' above. They will be added as tags and saved on the server automatically.</p>
                         </div>
 
                         <!-- Interactive Help Panel -->
@@ -152,7 +163,7 @@
         </div>
     </div>
 
-    <!-- JS for dynamic XML templating -->
+    <!-- JS for dynamic XML templating and image uploading -->
     <script>
         const templates = {
             singleselect: `<question>\n    <text>What is the default port for PostgreSQL databases?</text>\n    <option>3306</option>\n    <option>5432</option>\n    <option>1433</option>\n    <option>1521</option>\n</question>`,
@@ -166,6 +177,88 @@
             if (confirm("Loading this template will overwrite the XML Content area. Proceed?")) {
                 document.getElementById('xml_content').value = templates[type];
                 document.getElementById('question_type').value = type;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const textarea = document.getElementById('xml_content');
+
+            // Drag and drop handlers
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                textarea.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }, false);
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                textarea.addEventListener(eventName, () => {
+                    textarea.classList.add('border-blue-500', 'bg-blue-50/10', 'ring-2', 'ring-blue-200');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                textarea.addEventListener(eventName, () => {
+                    textarea.classList.remove('border-blue-500', 'bg-blue-50/10', 'ring-2', 'ring-blue-200');
+                }, false);
+            });
+
+            textarea.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                if (dt.files && dt.files.length) {
+                    handleImageFiles(dt.files);
+                }
+            });
+
+            // Clipboard Paste handler
+            textarea.addEventListener('paste', (e) => {
+                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                for (let index in items) {
+                    const item = items[index];
+                    if (item.kind === 'file' && item.type.startsWith('image/')) {
+                        const blob = item.getAsFile();
+                        handleImageFiles([blob]);
+                    }
+                }
+            });
+        });
+
+        function handleImageFileSelect(input) {
+            if (input.files && input.files.length) {
+                handleImageFiles(input.files);
+                input.value = ''; // Clear input selection
+            }
+        }
+
+        function handleImageFiles(files) {
+            const textarea = document.getElementById('xml_content');
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (!file.type.startsWith('image/')) continue;
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const base64Data = event.target.result;
+                    const imgTag = `<img src="${base64Data}" />`;
+                    insertAtCursor(textarea, imgTag);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function insertAtCursor(myField, myValue) {
+            if (myField.selectionStart || myField.selectionStart == '0') {
+                const startPos = myField.selectionStart;
+                const endPos = myField.selectionEnd;
+                myField.value = myField.value.substring(0, startPos)
+                    + myValue
+                    + myField.value.substring(endPos, myField.value.length);
+                myField.focus();
+                myField.selectionStart = startPos + myValue.length;
+                myField.selectionEnd = startPos + myValue.length;
+            } else {
+                myField.value += myValue;
+                myField.focus();
             }
         }
     </script>

@@ -1,5 +1,7 @@
 <?php
 use App\Http\Controllers\Admin\QuestionController;
+use App\Http\Controllers\Admin\TestController;
+use App\Http\Controllers\Admin\AccessCodeController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -19,11 +21,16 @@ Route::middleware('auth')->group(function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
     Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('questions', QuestionController::class);
+        Route::resource('questions', QuestionController::class);
+        Route::get('questions/{question}/preview', [QuestionController::class, 'preview'])
+            ->name('questions.preview');
 
-    Route::get('questions/{question}/preview', [QuestionController::class, 'preview'])
-        ->name('questions.preview');
-});
+        Route::resource('tests', TestController::class);
+        Route::get('tests/{test}/preview', [TestController::class, 'preview'])
+            ->name('tests.preview');
+
+        Route::resource('codes', AccessCodeController::class);
+    });
 
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
