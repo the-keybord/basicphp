@@ -1,10 +1,16 @@
 <?php
-
+use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/questions', [QuestionController::class, 'index'])->name('questions.index');
+    Route::get('/questions/create', [QuestionController::class, 'create'])->name('questions.create');
+    Route::post('/questions', [QuestionController::class, 'store'])->name('questions.store');
 });
 
 Route::get('/dashboard', function () {
