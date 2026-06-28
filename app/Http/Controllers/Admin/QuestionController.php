@@ -94,7 +94,7 @@ class QuestionController extends Controller
             'correct_answer_string' => $formattedAnswer,
         ]);
 
-        return redirect()->route('admin.questions.index')
+        return redirect()->route('admin.questions.preview', $question)
             ->with('success', 'Question correct answer configured successfully!');
     }
 
