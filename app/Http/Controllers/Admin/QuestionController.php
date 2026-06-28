@@ -177,7 +177,11 @@ class QuestionController extends Controller
 
             // Short-lived signed URL for the editor thumbnail preview only.
             if ($disk === 's3') {
-                $previewUrl = Storage::disk('s3')->temporaryUrl($storagePath, now()->addMinutes(30));
+                try {
+                    $previewUrl = Storage::disk('s3')->temporaryUrl($storagePath, now()->addMinutes(30));
+                } catch (\Exception $e) {
+                    $previewUrl = Storage::disk('s3')->url($storagePath);
+                }
             } else {
                 $previewUrl = Storage::disk('public')->url($storagePath);
             }
