@@ -4,7 +4,59 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $session->accessCode->test->name }} - Test Session</title>
+    
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    
+    <link rel="icon" type="image/png" href="{{ asset('images/zeceinfoblock.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        body {
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .bg-white {
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        .dark body {
+            background-color: #0f1015 !important;
+            color: #f1f5f9 !important;
+        }
+        .dark .bg-white {
+            background-color: #161720 !important;
+            border-color: #232535 !important;
+            color: #f1f5f9 !important;
+        }
+        .dark .text-gray-900,
+        .dark .text-gray-850,
+        .dark .text-gray-800,
+        .dark .text-gray-700 {
+            color: #f1f5f9 !important;
+        }
+        .dark .text-gray-650,
+        .dark .text-gray-600,
+        .dark .text-gray-500 {
+            color: #94a3b8 !important;
+        }
+        .dark header {
+            background-color: #161720 !important;
+            border-bottom: 1px solid #232535 !important;
+        }
+        .dark .nav-dot {
+            background-color: #1e202e !important;
+            border-color: #2e3146 !important;
+            color: #94a3b8 !important;
+        }
+        .dark .nav-dot:hover {
+            border-color: #00aeef !important;
+            background-color: rgba(0, 174, 239, 0.1) !important;
+        }
+    </style>
 </head>
 <body class="bg-gray-50 antialiased min-h-screen flex flex-col justify-between select-none">
 
@@ -13,13 +65,22 @@
         <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div class="flex items-center justify-between sm:justify-start gap-4">
                 <div class="flex items-center gap-3">
-                    <img src="{{ asset('images/logo.png') }}" alt="ZeceInfo Logo" class="h-8 w-auto object-contain">
+                    <img src="{{ asset('images/zeceinfoblock.png') }}" alt="ZeceInfo Logo" class="h-8 w-auto object-contain logo-toggle-trigger cursor-pointer">
                     <div class="h-6 w-[1px] bg-gray-250"></div>
                     <div>
                         <span class="text-xs font-bold text-gray-400 uppercase tracking-widest block">Student</span>
                         <span class="font-bold text-gray-800 text-sm md:text-base">{{ $session->firstname }} {{ $session->lastname }}</span>
                     </div>
                 </div>
+
+                <button type="button" class="logo-toggle-trigger p-2 text-slate-500 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white transition-colors duration-200 focus:outline-none" aria-label="Toggle Theme">
+                    <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+                    </svg>
+                    <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                    </svg>
+                </button>
                 
                 <div id="timer-box" class="flex items-center space-x-3 px-5 py-2.5 bg-blue-50 border border-blue-100 text-blue-700 rounded-xl transition duration-300">
                     <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -704,5 +765,36 @@
         });
     </script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Secret keyboard shortcut toggle (D or d)
+            document.addEventListener('keydown', (e) => {
+                if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+                    return;
+                }
+                if (e.key === 'd' || e.key === 'D') {
+                    toggleTheme();
+                }
+            });
+
+            // Logo click toggler
+            document.querySelectorAll('.logo-toggle-trigger').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    toggleTheme();
+                });
+            });
+
+            function toggleTheme() {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                }
+                window.dispatchEvent(new Event('theme-changed'));
+            }
+        });
+    </script>
 </body>
 </html>

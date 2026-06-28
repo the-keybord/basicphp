@@ -1,51 +1,75 @@
-<nav x-data="{ open: false }" class="bg-[#1a1b4b] border-b border-indigo-950/30 shadow-md">
+<x-navbar x-data="{ open: false }" logoUrl="{{ route('dashboard') }}" maxWidth="max-w-7xl">
     <style>
-        /* Admin Navbar Styling Overrides */
-        nav.bg-\[\#1a1b4b\] a {
+        /* Light mode admin styles (default) */
+        nav a {
+            color: #4b5563 !important;
+            border-bottom-color: transparent !important;
+        }
+        nav a:hover {
+            color: #111827 !important;
+            border-bottom-color: #e5e7eb !important;
+        }
+        nav a[class*="border-indigo-400"],
+        nav a[class*="text-gray-900"] {
+            color: #2b308b !important;
+            border-bottom-color: #00aeef !important;
+        }
+        nav button {
+            color: #4b5563 !important;
+            background-color: transparent !important;
+        }
+        nav button:hover {
+            color: #111827 !important;
+        }
+        nav button svg {
+            stroke: #4b5563 !important;
+        }
+
+        /* Dark mode overrides (when .dark class is on html) */
+        .dark nav {
+            background-color: #1a1b4b !important;
+            border-color: rgba(15, 16, 47, 0.3) !important;
+        }
+        .dark nav a {
             color: #d1d5db !important;
             border-bottom-color: transparent !important;
         }
-        nav.bg-\[\#1a1b4b\] a:hover {
+        .dark nav a:hover {
             color: #ffffff !important;
             border-bottom-color: rgba(255, 255, 255, 0.2) !important;
         }
-        /* Active Link Styling */
-        nav.bg-\[\#1a1b4b\] a[class*="border-indigo-400"],
-        nav.bg-\[\#1a1b4b\] a[class*="text-gray-900"] {
+        .dark nav a[class*="border-indigo-400"],
+        .dark nav a[class*="text-gray-900"] {
             color: #ffffff !important;
             border-bottom-color: #00aeef !important;
         }
-        
-        /* Settings Dropdown Button */
-        nav.bg-\[\#1a1b4b\] button {
+        .dark nav button {
             color: #d1d5db !important;
             background-color: transparent !important;
         }
-        nav.bg-\[\#1a1b4b\] button:hover {
+        .dark nav button:hover {
             color: #ffffff !important;
         }
-        
-        /* Mobile Menu Hamburger icon */
-        nav.bg-\[\#1a1b4b\] button svg {
+        .dark nav button svg {
             stroke: #ffffff !important;
         }
 
-        /* Mobile responsive drawer overlay */
-        nav.bg-\[\#1a1b4b\] div.sm\:hidden {
+        /* Mobile responsive drawer overlay overrides */
+        .dark nav div.sm\:hidden {
             background-color: #15163f !important;
             border-top-color: #0f102f !important;
         }
-        nav.bg-\[\#1a1b4b\] div.sm\:hidden a {
+        .dark nav div.sm\:hidden a {
             color: #d1d5db !important;
         }
-        nav.bg-\[\#1a1b4b\] div.sm\:hidden a:hover {
+        .dark nav div.sm\:hidden a:hover {
             background-color: #1e205c !important;
             color: #ffffff !important;
         }
-        nav.bg-\[\#1a1b4b\] div.sm\:hidden div {
+        .dark nav div.sm\:hidden div {
             color: #ffffff !important;
         }
-        nav.bg-\[\#1a1b4b\] div.sm\:hidden div.text-gray-500 {
+        .dark nav div.sm\:hidden div.text-gray-500 {
             color: #9ca3af !important;
         }
     </style>
@@ -53,12 +77,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
-                <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
-                    </a>
-                </div>
+                <!-- Logo offset spacer -->
+                <div class="w-40 h-16"></div>
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
@@ -84,8 +104,18 @@
                 </div>
             </div>
 
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <!-- Settings Dropdown & Theme Toggle -->
+            <div class="hidden sm:flex sm:items-center sm:ms-6 space-x-3">
+                <button type="button" class="logo-toggle-trigger p-2 text-slate-500 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white transition-colors duration-200 focus:outline-none" aria-label="Toggle Theme">
+                    <!-- Sun Icon -->
+                    <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+                    </svg>
+                    <!-- Moon Icon -->
+                    <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                    </svg>
+                </button>
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
@@ -131,7 +161,7 @@
     </div>
 
     <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden rounded-[1.5rem] mt-1 overflow-hidden border border-slate-200 dark:border-zinc-800">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
@@ -152,9 +182,19 @@
 
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200">
-            <div class="px-4">
-                <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+            <div class="flex items-center justify-between px-4">
+                <div>
+                    <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
+                    <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                </div>
+                <button type="button" class="logo-toggle-trigger p-2 text-slate-500 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white transition-colors duration-200 focus:outline-none" aria-label="Toggle Theme">
+                    <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+                    </svg>
+                    <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                    </svg>
+                </button>
             </div>
 
             <div class="mt-3 space-y-1">
@@ -175,4 +215,4 @@
             </div>
         </div>
     </div>
-</nav>
+</x-navbar>

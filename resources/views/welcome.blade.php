@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Zece Info - Pregătire Informatică</title>
     
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    
+    <link rel="icon" type="image/png" href="{{ asset('images/zeceinfoblock.png') }}">
+    
     <!-- Google Fonts: Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,36 +31,37 @@
 <body class="bg-black text-white antialiased selection:bg-purple-650 selection:text-white">
 
     <!-- FLOATING NAVBAR -->
-    <nav class="fixed top-5 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-6xl bg-[#212121]/90 backdrop-blur-md border border-neutral-800 rounded-[2rem] px-6 py-3 z-50 flex items-center justify-between shadow-2xl">
-        <div class="flex items-center gap-3">
-            <a href="#section1" class="flex items-center gap-2">
-                <img src="{{ asset('images/zeceinfoblock.png') }}" alt="Zece Info" class="h-10 w-auto object-contain">
-            </a>
-        </div>
-        
-        <!-- Desktop Links - Hidden -->
-        <div class="hidden"></div>
-
-        <div class="flex items-center gap-3">
-            <a href="{{ route('login') }}" class="inline-flex px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-full border border-neutral-700 bg-neutral-900/50 hover:bg-white hover:text-black transition duration-300">
+    <x-navbar logoUrl="#section1" maxWidth="max-w-6xl">
+        <x-slot name="actions">
+            <button type="button" class="logo-toggle-trigger p-2 text-slate-500 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white transition-colors duration-200 focus:outline-none" aria-label="Toggle Theme">
+                <!-- Sun Icon -->
+                <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+                </svg>
+                <!-- Moon Icon -->
+                <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                </svg>
+            </button>
+            <a href="{{ route('login') }}" class="inline-flex px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-full border border-slate-200 dark:border-neutral-700 bg-slate-100 dark:bg-neutral-900/50 text-slate-800 dark:text-white hover:bg-slate-250 dark:hover:bg-white dark:hover:text-black transition duration-300">
                 Admin Login
             </a>
-        </div>
-    </nav>
+        </x-slot>
+    </x-navbar>
 
     <!-- MOBILE DRAWER MENU - Hidden -->
     <div id="mobileMenu" class="hidden"></div>
 
-    <section id="section1" class="min-h-screen pt-32 pb-16 px-4 md:px-8 flex flex-col items-center justify-center bg-black">
+    <section id="section1" class="min-h-screen pt-32 pb-16 px-4 md:px-8 flex flex-col items-center justify-center bg-slate-50 dark:bg-black text-slate-800 dark:text-white transition-colors duration-300">
         <div class="max-w-md w-full mx-auto">
             
             <!-- Code Entry Panel -->
-            <div class="bg-[#121212] border border-neutral-800 rounded-3xl p-8 md:p-12 flex flex-col items-center justify-center text-center shadow-xl relative overflow-hidden group w-full">
+            <div class="bg-white dark:bg-[#121212] border border-slate-200 dark:border-neutral-800 rounded-3xl p-8 md:p-12 flex flex-col items-center justify-center text-center shadow-lg dark:shadow-xl relative overflow-hidden group w-full transition-all duration-300 text-slate-850 dark:text-neutral-200">
                 <div class="absolute -top-24 -left-24 w-48 h-48 bg-purple-600/10 rounded-full blur-3xl group-hover:bg-purple-600/20 transition-all duration-500"></div>
                 <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-blue-600/10 rounded-full blur-3xl group-hover:bg-blue-600/20 transition-all duration-500"></div>
 
-                <h2 class="text-3xl font-black text-white mb-2">Ai deja un cod?</h2>
-                <p class="text-neutral-400 text-sm max-w-sm mb-8 leading-relaxed">
+                <h2 class="text-3xl font-black text-slate-900 dark:text-white mb-2 transition-colors duration-300">Ai deja un cod?</h2>
+                <p class="text-slate-500 dark:text-neutral-400 text-sm max-w-sm mb-8 leading-relaxed transition-colors duration-300">
                     Introdu codul primit de la instructorul tău pentru a începe sesiunea de evaluare.
                 </p>
                 
@@ -62,7 +73,7 @@
                             name="access_code" 
                             maxlength="6"
                             placeholder="DEMO12"
-                            class="w-full text-center text-4xl tracking-[0.3em] font-mono font-bold uppercase border border-neutral-800 focus:border-purple-500 rounded-2xl bg-neutral-900 text-white placeholder-neutral-700 outline-none p-5 transition duration-300 focus:ring-2 focus:ring-purple-500/20"
+                            class="w-full text-center text-4xl tracking-[0.3em] font-mono font-bold uppercase border border-slate-200 dark:border-neutral-800 focus:border-blue-500 dark:focus:border-purple-500 rounded-2xl bg-slate-50 dark:bg-neutral-900 text-slate-900 dark:text-white placeholder-slate-300 dark:placeholder-neutral-750 outline-none p-5 transition duration-300 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-purple-500/20"
                             required
                             autocomplete="off"
                         >
@@ -76,7 +87,7 @@
                         @enderror
                     </div>
 
-                    <button type="submit" class="w-full bg-white hover:bg-neutral-200 text-black font-extrabold uppercase rounded-2xl py-4.5 px-8 transition duration-300 shadow-lg hover:shadow-white/5 active:scale-98 tracking-wider text-sm">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 dark:bg-white dark:hover:bg-neutral-200 text-white dark:text-black font-extrabold uppercase rounded-2xl py-4.5 px-8 transition duration-300 shadow-lg dark:hover:shadow-white/5 active:scale-98 tracking-wider text-sm">
                         Continuare
                     </button>
                 </form>
@@ -348,6 +359,39 @@
                     mobileMenu.classList.add('hidden');
                 }
             });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Secret keyboard shortcut toggle (D or d)
+            document.addEventListener('keydown', (e) => {
+                if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+                    return;
+                }
+                if (e.key === 'd' || e.key === 'D') {
+                    toggleTheme();
+                }
+            });
+
+            // Logo click toggler
+            document.querySelectorAll('.logo-toggle-trigger').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    toggleTheme();
+                });
+            });
+
+            function toggleTheme() {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                }
+                window.dispatchEvent(new Event('theme-changed'));
+            }
         });
     </script>
 
