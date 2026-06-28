@@ -43,6 +43,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('codes', AccessCodeController::class);
 
         Route::get('sessions', [SessionController::class, 'index'])->name('sessions.index');
+        Route::get('sessions/{session}/review', [SessionController::class, 'review'])->name('sessions.review');
         Route::post('sessions/{session}/interrupt', [SessionController::class, 'interrupt'])->name('sessions.interrupt');
     });
 

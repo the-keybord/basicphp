@@ -47,4 +47,29 @@ class SessionController extends Controller
 
         return back()->with('success', "Session for {$session->firstname} {$session->lastname} was successfully interrupted and submitted remotely!");
     }
+
+    public function review(TestSession $session)
+    {
+        $session->load(['accessCode.test']);
+
+        // Fetch questions in display order
+        $questionsMap = Question::whereIn('id', $session->questions_order)->get()->keyBy('id');
+        $orderedQuestions = collect($session->questions_order)
+            ->map(fn($id) => $questionsMap->get($id))
+            ->filter();
+
+        $parser = new \App\Services\QuestionEngine\QuestionParser();
+        $renderer = new \App\Services\QuestionEngine\QuestionRenderer();
+
+        $renderedQuestions = $orderedQuestions->map(function ($q) use ($parser, $renderer) {
+            $parsed = $parser->parse($q->xml_content);
+            $parsed = $renderer->render($parsed);
+            return [
+                'model' => $q,
+                'parsed' => $parsed,
+            ];
+        });
+
+        return view('admin.sessions.review', compact('session', 'renderedQuestions'));
+    }
 }

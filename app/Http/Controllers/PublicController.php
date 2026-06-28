@@ -112,6 +112,10 @@ class PublicController extends Controller
     {
         $session = TestSession::with(['accessCode.test'])->where('token', $token)->firstOrFail();
 
+        if ($session->is_interrupted) {
+            return redirect()->route('home')->withErrors(['access_code' => 'This test session was interrupted.']);
+        }
+
         if ($session->completed_at) {
             return redirect()->route('test.results', ['token' => $token]);
         }
@@ -153,6 +157,10 @@ class PublicController extends Controller
     {
         $session = TestSession::where('token', $token)->firstOrFail();
 
+        if ($session->is_interrupted) {
+            return redirect()->route('home')->withErrors(['access_code' => 'This test session was interrupted.']);
+        }
+
         if ($session->completed_at) {
             return redirect()->route('test.results', ['token' => $token]);
         }
@@ -167,6 +175,10 @@ class PublicController extends Controller
     public function showResults(string $token)
     {
         $session = TestSession::with(['accessCode.test'])->where('token', $token)->firstOrFail();
+
+        if ($session->is_interrupted) {
+            return redirect()->route('home')->withErrors(['access_code' => 'This test session was interrupted. Results are not available.']);
+        }
 
         if (!$session->completed_at) {
             return redirect()->route('test.session', ['token' => $token]);

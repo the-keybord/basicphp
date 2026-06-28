@@ -450,10 +450,10 @@
                     <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto border border-red-100">
                         <svg class="w-8 h-8 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                     </div>
-                    <h2 class="text-2xl font-black text-gray-900">Session Completed</h2>
+                    <h2 class="text-2xl font-black text-gray-900">Session Interrupted</h2>
                     <p class="text-sm text-gray-600 leading-relaxed">
-                        Your test session has been remotely locked and submitted by your instructor. 
-                        You are being redirected to your results page.
+                        Your test session has been remotely locked and canceled by your instructor. 
+                        You are being redirected back to the homepage.
                     </p>
                     <div class="pt-2">
                         <span class="inline-block px-5 py-2.5 bg-red-650 text-white font-bold rounded-xl shadow-md transition animate-pulse">
@@ -465,7 +465,7 @@
             document.body.appendChild(modal);
             
             setTimeout(() => {
-                window.location.href = "{{ route('test.results', $session->token) }}";
+                window.location.href = "{{ route('home') }}";
             }, 3000);
         }
 
