@@ -28,7 +28,8 @@ class AccessCodeController extends Controller
             'type' => 'required|string|in:testing,resource',
             'test_id' => 'required_if:type,testing|nullable|exists:tests,id',
             'resource_url' => 'required_if:type,resource|nullable|url',
-            'expires_at' => 'nullable|date|after:now',
+            'expires_value' => 'nullable|integer|min:1',
+            'expires_unit' => 'required_with:expires_value|string|in:minutes,hours,days',
         ]);
 
         // Generate unique 6-character uppercase code
@@ -47,12 +48,24 @@ class AccessCodeController extends Controller
             ];
         }
 
+        $expiresAt = null;
+        if ($request->filled('expires_value')) {
+            $value = (int) $request->expires_value;
+            $unit = $request->input('expires_unit');
+            $expiresAt = match ($unit) {
+                'minutes' => now()->addMinutes($value),
+                'hours' => now()->addHours($value),
+                'days' => now()->addDays($value),
+                default => null,
+            };
+        }
+
         AccessCode::create([
             'code' => $code,
             'type' => $request->type,
             'test_id' => $request->type === 'testing' ? $request->test_id : null,
             'resource_url' => $request->type === 'resource' ? $request->resource_url : null,
-            'expires_at' => $request->expires_at,
+            'expires_at' => $expiresAt,
             'rules' => $rules,
         ]);
 

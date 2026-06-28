@@ -69,11 +69,22 @@
                         <p class="mt-1 text-xs text-gray-500">Entering this code will redirect students directly to this external link.</p>
                     </div>
 
-                    <!-- Expiration DateTime -->
+                    <!-- Expiration Duration -->
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Expiration Date & Time <span class="text-gray-400 font-normal">(Optional)</span></label>
-                        <input type="datetime-local" name="expires_at" value="{{ old('expires_at') }}" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5">
-                        <p class="mt-1 text-xs text-gray-500">Leave blank for a code that never expires. Otherwise, the code will become invalid after this date and time.</p>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Expires In <span class="text-gray-400 font-normal">(Optional)</span></label>
+                        <div class="flex space-x-3">
+                            <div class="w-2/3">
+                                <input type="number" name="expires_value" id="expires_value" value="{{ old('expires_value') }}" min="1" placeholder="e.g. 5" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5">
+                            </div>
+                            <div class="w-1/3">
+                                <select name="expires_unit" id="expires_unit" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5">
+                                    <option value="minutes" {{ old('expires_unit') == 'minutes' ? 'selected' : '' }}>Minutes</option>
+                                    <option value="hours" {{ old('expires_unit') == 'hours' || !old('expires_unit') ? 'selected' : '' }}>Hours</option>
+                                    <option value="days" {{ old('expires_unit') == 'days' ? 'selected' : '' }}>Days</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">Leave blank for a code that never expires. Otherwise, specify the duration after which the code will become invalid.</p>
                     </div>
 
                     <!-- Test Modifiers Checkboxes (Testing Only) -->
