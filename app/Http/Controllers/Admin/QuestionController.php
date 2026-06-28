@@ -160,8 +160,12 @@ class QuestionController extends Controller
             $filename = Str::uuid() . '.jpg';
             $storagePath = 'questions/' . $filename;
 
-            // Resize with GD (built-in PHP, no extra dependency)
-            $imageData = $this->resizeImage($file->getRealPath(), 1400, 85);
+            // Resize with GD if extension is loaded, otherwise upload original
+            if (extension_loaded('gd')) {
+                $imageData = $this->resizeImage($file->getRealPath(), 1400, 85);
+            } else {
+                $imageData = file_get_contents($file->getRealPath());
+            }
 
             Storage::disk($disk)->put($storagePath, $imageData);
 
