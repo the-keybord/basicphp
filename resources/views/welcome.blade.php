@@ -28,46 +28,24 @@
             </a>
         </div>
         
-        <!-- Desktop Links -->
-        <div class="hidden md:flex items-center gap-1.5">
-            <a href="#section1" class="px-4 py-2 text-sm font-semibold rounded-2xl hover:bg-white/10 transition">Cod</a>
-            <a href="#section5" class="px-4 py-2 text-sm font-semibold rounded-2xl hover:bg-white/10 transition">Servicii</a>
-            <a href="#section2" class="px-4 py-2 text-sm font-semibold rounded-2xl hover:bg-white/10 transition">Contacte</a>
-            <a href="#section4" class="px-4 py-2 text-sm font-semibold rounded-2xl hover:bg-white/10 transition">Despre Proiect</a>
-        </div>
+        <!-- Desktop Links - Hidden -->
+        <div class="hidden"></div>
 
         <div class="flex items-center gap-3">
-            <a href="{{ route('login') }}" class="hidden sm:inline-flex px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-full border border-neutral-700 bg-neutral-900/50 hover:bg-white hover:text-black transition duration-300">
+            <a href="{{ route('login') }}" class="inline-flex px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-full border border-neutral-700 bg-neutral-900/50 hover:bg-white hover:text-black transition duration-300">
                 Admin Login
             </a>
-            
-            <!-- Mobile Menu Toggle Button -->
-            <button id="navbarToggler" type="button" class="md:hidden p-2 text-white hover:text-purple-400 transition" aria-label="Toggle Menu">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16m-7 6h7"/>
-                </svg>
-            </button>
         </div>
     </nav>
 
-    <!-- MOBILE DRAWER MENU -->
-    <div id="mobileMenu" class="hidden fixed top-24 left-4 right-4 bg-[#212121]/95 backdrop-blur-lg border border-neutral-800 rounded-3xl p-6 z-40 flex flex-col gap-4 shadow-2xl transition duration-300">
-        <a href="#section1" class="px-4 py-3 text-base font-semibold rounded-xl hover:bg-white/10 transition">Cod</a>
-        <a href="#section5" class="px-4 py-3 text-base font-semibold rounded-xl hover:bg-white/10 transition">Servicii</a>
-        <a href="#section2" class="px-4 py-3 text-base font-semibold rounded-xl hover:bg-white/10 transition">Contacte</a>
-        <a href="#section4" class="px-4 py-3 text-base font-semibold rounded-xl hover:bg-white/10 transition">Despre Proiect</a>
-        <div class="h-[1px] bg-neutral-800 my-2"></div>
-        <a href="{{ route('login') }}" class="w-full text-center px-4 py-3 text-sm font-bold uppercase tracking-widest rounded-xl bg-purple-650 text-white hover:bg-purple-700 transition">
-            Admin Login
-        </a>
-    </div>
+    <!-- MOBILE DRAWER MENU - Hidden -->
+    <div id="mobileMenu" class="hidden"></div>
 
-    <!-- SECTION 1: HERO & START (Black) -->
     <section id="section1" class="min-h-screen pt-32 pb-16 px-4 md:px-8 flex flex-col items-center justify-center bg-black">
-        <div class="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+        <div class="max-w-md w-full mx-auto">
             
             <!-- Code Entry Panel -->
-            <div class="bg-[#121212] border border-neutral-800 rounded-3xl p-8 md:p-12 flex flex-col items-center justify-center text-center shadow-xl relative overflow-hidden group">
+            <div class="bg-[#121212] border border-neutral-800 rounded-3xl p-8 md:p-12 flex flex-col items-center justify-center text-center shadow-xl relative overflow-hidden group w-full">
                 <div class="absolute -top-24 -left-24 w-48 h-48 bg-purple-600/10 rounded-full blur-3xl group-hover:bg-purple-600/20 transition-all duration-500"></div>
                 <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-blue-600/10 rounded-full blur-3xl group-hover:bg-blue-600/20 transition-all duration-500"></div>
 
@@ -102,72 +80,16 @@
                         Continuare
                     </button>
                 </form>
-
-                <div class="w-4/5 h-[1px] bg-neutral-800/80 my-8"></div>
-
-                <h2 class="text-xl font-bold text-white mb-2">Nu ai un cod?</h2>
-                <p class="text-neutral-400 text-sm max-w-sm mb-6 leading-relaxed">
-                    Contactează-ne pentru a obține acces la platformă și materiale de studiu.
-                </p>
-                <a href="#section2" class="inline-flex items-center gap-2 border border-neutral-700 hover:border-white hover:bg-white hover:text-black text-white font-bold uppercase rounded-full px-8 py-3 transition duration-300 tracking-wider text-xs">
-                    Contactează-ne
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                </a>
             </div>
 
-            <!-- Mentors Panel -->
-            <div class="bg-[#121212] border border-neutral-800 rounded-3xl p-8 md:p-10 flex flex-col justify-between shadow-xl relative overflow-hidden group">
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-blue-600/5 rounded-full blur-3xl"></div>
-
-                <div>
-                    <h2 class="text-2xl font-black text-white mb-6 text-center lg:text-left">Mentorii Noștri</h2>
-                    <div class="flex flex-col sm:flex-row gap-8 justify-center items-center lg:items-start">
-                        
-                        <!-- Mentor Adrian -->
-                        <div class="flex flex-col items-center text-center">
-                            <div class="relative w-36 h-36 mb-4">
-                                <div class="absolute w-[85%] h-[85%] bg-amber-500 rounded-2xl top-0 left-0"></div>
-                                <img src="{{ asset('images/mentorA.png') }}" alt="Adrian" class="absolute w-[90%] h-[90%] object-cover rounded-2xl bottom-0 right-0 border border-neutral-800 bg-[#222]">
-                            </div>
-                            <h4 class="text-base font-bold text-white mb-0.5">Andrian</h4>
-                            <p class="text-xs text-neutral-400 font-medium">Databases & Data Analytics</p>
-                        </div>
-                        
-                        <!-- Mentor Vladislav -->
-                        <div class="flex flex-col items-center text-center">
-                            <div class="relative w-36 h-36 mb-4">
-                                <div class="absolute w-[85%] h-[85%] bg-teal-500 rounded-2xl top-0 left-0"></div>
-                                <img src="{{ asset('images/mentorV.png') }}" alt="Vladislav" class="absolute w-[90%] h-[90%] object-cover rounded-2xl bottom-0 right-0 border border-neutral-800 bg-[#222]">
-                            </div>
-                            <h4 class="text-base font-bold text-white mb-0.5">Vladislav</h4>
-                            <p class="text-xs text-neutral-400 font-medium">Python, HTML & Networking</p>
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- Stats Footer -->
-                <div class="w-full mt-10 pt-6 border-t border-neutral-800/80 grid grid-cols-3 gap-2 text-center">
-                    <div class="space-y-1">
-                        <div class="text-2xl md:text-3xl font-black text-white">400+</div>
-                        <p class="text-xxs uppercase tracking-wider text-neutral-500 font-bold leading-tight">Copii examinați</p>
-                    </div>
-                    <div class="space-y-1">
-                        <div class="text-2xl md:text-3xl font-black text-white">2</div>
-                        <p class="text-xxs uppercase tracking-wider text-neutral-500 font-bold leading-tight">Ani experiență</p>
-                    </div>
-                    <div class="space-y-1">
-                        <div class="text-2xl md:text-3xl font-black text-white">99.9%</div>
-                        <p class="text-xxs uppercase tracking-wider text-neutral-500 font-bold leading-tight">Rată succes</p>
-                    </div>
-                </div>
-            </div>
+            <!-- Mentors Panel - Hidden -->
+            <div class="hidden"></div>
 
         </div>
     </section>
 
-    <!-- SECTION 5: SERVICII (Dark Purple) -->
-    <section id="section5" class="py-24 px-4 md:px-8 bg-[#120E16] border-t border-purple-950/20 relative overflow-hidden">
+    <!-- SECTION 5: SERVICII (Dark Purple) - Hidden -->
+    <section id="section5" class="hidden">
         <div class="absolute -top-40 right-10 w-96 h-96 bg-purple-900/10 rounded-full blur-3xl"></div>
         
         <div class="max-w-6xl mx-auto space-y-12 relative z-10">
@@ -303,8 +225,8 @@
         </div>
     </section>
 
-    <!-- SECTION 2: CONTACT (Dark Blue) -->
-    <section id="section2" class="py-24 px-4 md:px-8 bg-[#0E1116] border-t border-blue-950/20 relative overflow-hidden">
+    <!-- SECTION 2: CONTACT (Dark Blue) - Hidden -->
+    <section id="section2" class="hidden">
         <div class="absolute bottom-0 left-10 w-96 h-96 bg-blue-900/10 rounded-full blur-3xl"></div>
         
         <div class="max-w-4xl mx-auto space-y-12 relative z-10">
@@ -375,8 +297,8 @@
         </div>
     </section>
 
-    <!-- SECTION 4: DESPRE (Dark Red) -->
-    <section id="section4" class="py-24 px-4 md:px-8 bg-[#160E0E] border-t border-red-950/20 relative overflow-hidden">
+    <!-- SECTION 4: DESPRE (Dark Red) - Hidden -->
+    <section id="section4" class="hidden">
         <div class="absolute top-10 left-10 w-96 h-96 bg-red-900/5 rounded-full blur-3xl"></div>
         
         <div class="max-w-4xl mx-auto space-y-12 relative z-10">
