@@ -1,0 +1,12 @@
+.git
+.gitignore
+.dockerignore
+node_modules
+vendor
+old_project
+.env
+database/database.sqlite
+storage/logs/*.log
+tests
+.phpunit.result.cache
+nixpacks.toml
