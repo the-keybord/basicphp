@@ -7,6 +7,8 @@ use App\Http\Controllers\PublicController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\ImageProxyController;
+
 Route::get('/', [PublicController::class, 'index'])->name('home');
 Route::post('/access', [PublicController::class, 'accessCode'])->name('access.code');
 
@@ -16,6 +18,7 @@ Route::get('/test/session/{token}', [PublicController::class, 'showSession'])->n
 Route::post('/test/session/{token}/submit', [PublicController::class, 'submitSession'])->name('test.submit');
 Route::get('/test/session/{token}/results', [PublicController::class, 'showResults'])->name('test.results');
 Route::post('/test/session/{token}/auto-save', [PublicController::class, 'autoSave'])->name('test.session.autosave');
+Route::get('/images/questions/{filename}', [ImageProxyController::class, 'show'])->name('image.proxy');
 
 
 Route::middleware('auth')->group(function () {

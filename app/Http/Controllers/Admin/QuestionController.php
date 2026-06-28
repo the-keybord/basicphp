@@ -182,16 +182,8 @@ class QuestionController extends Controller
 
             Storage::disk($disk)->put($storagePath, $imageData);
 
-            // Short-lived signed URL for the editor thumbnail preview only.
-            if ($disk === 's3') {
-                try {
-                    $previewUrl = Storage::disk('s3')->temporaryUrl($storagePath, now()->addMinutes(30));
-                } catch (\Exception $e) {
-                    $previewUrl = Storage::disk('s3')->url($storagePath);
-                }
-            } else {
-                $previewUrl = Storage::disk('public')->url($storagePath);
-            }
+            // Generate a secure relative proxy URL for the editor thumbnail preview
+            $previewUrl = route('image.proxy', ['filename' => $filename], false);
 
             return response()->json([
                 'success'     => true,

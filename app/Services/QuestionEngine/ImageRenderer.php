@@ -21,14 +21,7 @@ class ImageRenderer
                 // $part is the captured filename inside @img('...')
                 $path = 'questions/' . $part;
 
-                if (config('filesystems.default') === 's3') {
-                    $url = \Illuminate\Support\Facades\Storage::disk('s3')->temporaryUrl(
-                        $path,
-                        now()->addMinutes(30)
-                    );
-                } else {
-                    $url = \Illuminate\Support\Facades\Storage::disk('public')->url($path);
-                }
+                $url = route('image.proxy', ['filename' => $part], false);
 
                 $output .= "<img src=\"$url\" class=\"rounded my-3\" style=\"max-width: 600px; height: auto; display: block;\">";
             }
