@@ -1,4 +1,54 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+<nav x-data="{ open: false }" class="bg-[#1a1b4b] border-b border-indigo-950/30 shadow-md">
+    <style>
+        /* Admin Navbar Styling Overrides */
+        nav.bg-\[\#1a1b4b\] a {
+            color: #d1d5db !important;
+            border-bottom-color: transparent !important;
+        }
+        nav.bg-\[\#1a1b4b\] a:hover {
+            color: #ffffff !important;
+            border-bottom-color: rgba(255, 255, 255, 0.2) !important;
+        }
+        /* Active Link Styling */
+        nav.bg-\[\#1a1b4b\] a[class*="border-indigo-400"],
+        nav.bg-\[\#1a1b4b\] a[class*="text-gray-900"] {
+            color: #ffffff !important;
+            border-bottom-color: #00aeef !important;
+        }
+        
+        /* Settings Dropdown Button */
+        nav.bg-\[\#1a1b4b\] button {
+            color: #d1d5db !important;
+            background-color: transparent !important;
+        }
+        nav.bg-\[\#1a1b4b\] button:hover {
+            color: #ffffff !important;
+        }
+        
+        /* Mobile Menu Hamburger icon */
+        nav.bg-\[\#1a1b4b\] button svg {
+            stroke: #ffffff !important;
+        }
+
+        /* Mobile responsive drawer overlay */
+        nav.bg-\[\#1a1b4b\] div.sm\:hidden {
+            background-color: #15163f !important;
+            border-top-color: #0f102f !important;
+        }
+        nav.bg-\[\#1a1b4b\] div.sm\:hidden a {
+            color: #d1d5db !important;
+        }
+        nav.bg-\[\#1a1b4b\] div.sm\:hidden a:hover {
+            background-color: #1e205c !important;
+            color: #ffffff !important;
+        }
+        nav.bg-\[\#1a1b4b\] div.sm\:hidden div {
+            color: #ffffff !important;
+        }
+        nav.bg-\[\#1a1b4b\] div.sm\:hidden div.text-gray-500 {
+            color: #9ca3af !important;
+        }
+    </style>
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">

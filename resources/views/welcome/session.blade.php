@@ -12,9 +12,13 @@
     <header class="sticky top-0 bg-white border-b border-gray-150 shadow-sm z-50">
         <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div class="flex items-center justify-between sm:justify-start gap-4">
-                <div>
-                    <span class="text-xs font-bold text-gray-400 uppercase tracking-widest block">Student</span>
-                    <span class="font-bold text-gray-800 text-sm md:text-base">{{ $session->firstname }} {{ $session->lastname }}</span>
+                <div class="flex items-center gap-3">
+                    <img src="{{ asset('images/logo.png') }}" alt="ZeceInfo Logo" class="h-8 w-auto object-contain">
+                    <div class="h-6 w-[1px] bg-gray-250"></div>
+                    <div>
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest block">Student</span>
+                        <span class="font-bold text-gray-800 text-sm md:text-base">{{ $session->firstname }} {{ $session->lastname }}</span>
+                    </div>
                 </div>
                 
                 <div id="timer-box" class="flex items-center space-x-3 px-5 py-2.5 bg-blue-50 border border-blue-100 text-blue-700 rounded-xl transition duration-300">
