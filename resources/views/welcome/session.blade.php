@@ -421,7 +421,7 @@
             
             const formData = new FormData(form);
             
-            fetch("{{ route('test.session.autosave', $session->token) }}", {
+            fetch("{{ route('test.session.autosave', $session->token, false) }}", {
                 method: 'POST',
                 body: formData,
                 headers: {

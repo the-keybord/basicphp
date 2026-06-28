@@ -248,7 +248,7 @@
                 const formData = new FormData();
                 formData.append('image', file);
 
-                fetch("{{ route('admin.questions.upload-image') }}", {
+                fetch("{{ route('admin.questions.upload-image', [], false) }}", {
                     method: 'POST',
                     body: formData,
                     headers: {
