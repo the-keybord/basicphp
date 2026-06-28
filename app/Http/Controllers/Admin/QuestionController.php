@@ -119,6 +119,12 @@ class QuestionController extends Controller
         return view('questions.preview', compact('parsed', 'question'));
     }
 
+    public function show(Question $question)
+    {
+        return $this->preview($question);
+    }
+
+
     /**
      * Extracts embedded base64 images, decodes and saves them to storage,
      * and replaces the <img src="data:..."> with an @img('filename') token
