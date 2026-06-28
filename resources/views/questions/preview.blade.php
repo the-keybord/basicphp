@@ -36,6 +36,42 @@
 
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
+
+            <!-- Slideshow / Quick Navigation Bar -->
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl p-4.5 shadow-md flex items-center justify-between">
+                <div class="flex items-center space-x-3.5">
+                    <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/20">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-sm block">Quick Review Mode</span>
+                        <span class="text-xs text-blue-100/80">Press <kbd class="px-1.5 py-0.5 bg-white/25 rounded text-white font-mono font-bold text-[10px]">←</kbd> and <kbd class="px-1.5 py-0.5 bg-white/25 rounded text-white font-mono font-bold text-[10px]">→</kbd> on your keyboard to navigate rapidly.</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2.5">
+                    @if($prevId)
+                        <a id="prev-question-btn" href="{{ route('admin.questions.preview', $prevId, false) }}" class="inline-flex items-center px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/10 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-sm">
+                            ← Prev
+                        </a>
+                    @else
+                        <button disabled class="inline-flex items-center px-4 py-2 bg-white/5 text-white/30 border border-white/5 rounded-xl text-xs font-bold uppercase tracking-wider cursor-not-allowed">
+                            ← Prev
+                        </button>
+                    @endif
+
+                    @if($nextId)
+                        <a id="next-question-btn" href="{{ route('admin.questions.preview', $nextId, false) }}" class="inline-flex items-center px-4 py-2 bg-white text-blue-600 hover:bg-blue-50 text-white rounded-xl text-xs font-extrabold uppercase tracking-wider transition shadow-md">
+                            Next →
+                        </a>
+                    @else
+                        <button disabled class="inline-flex items-center px-4 py-2 bg-white/5 text-white/30 border border-white/5 rounded-xl text-xs font-bold uppercase tracking-wider cursor-not-allowed">
+                            Next →
+                        </button>
+                    @endif
+                </div>
+            </div>
             
             @if(session('success'))
                 <div class="p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg shadow-sm flex items-center">
@@ -647,5 +683,24 @@
                 updateAnswerContainer();
             }
         }
+
+        // Keyboard navigation for Slideshow Review Mode
+        document.addEventListener('keydown', (e) => {
+            // Ignore keypresses if typing inside input fields or textareas
+            if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+                return;
+            }
+            if (e.key === 'ArrowLeft') {
+                const prevBtn = document.getElementById('prev-question-btn');
+                if (prevBtn && prevBtn.href) {
+                    window.location.href = prevBtn.href;
+                }
+            } else if (e.key === 'ArrowRight') {
+                const nextBtn = document.getElementById('next-question-btn');
+                if (nextBtn && nextBtn.href) {
+                    window.location.href = nextBtn.href;
+                }
+            }
+        });
     </script>
 </x-app-layout>

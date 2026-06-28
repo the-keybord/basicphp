@@ -116,7 +116,14 @@ class QuestionController extends Controller
         $parsed = $parser->parse($question->xml_content);
         $parsed = $renderer->render($parsed);
 
-        return view('questions.preview', compact('parsed', 'question'));
+        // Find next and previous question IDs for Slideshow mode
+        $prevQuestion = Question::where('id', '<', $question->id)->orderBy('id', 'desc')->first();
+        $nextQuestion = Question::where('id', '>', $question->id)->orderBy('id', 'asc')->first();
+
+        $prevId = $prevQuestion ? $prevQuestion->id : null;
+        $nextId = $nextQuestion ? $nextQuestion->id : null;
+
+        return view('questions.preview', compact('parsed', 'question', 'prevId', 'nextId'));
     }
 
     public function show(Question $question)
