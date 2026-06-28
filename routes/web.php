@@ -2,6 +2,7 @@
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\TestController;
 use App\Http\Controllers\Admin\AccessCodeController;
+use App\Http\Controllers\Admin\SessionController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -9,10 +10,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [PublicController::class, 'index'])->name('home');
 Route::post('/access', [PublicController::class, 'accessCode'])->name('access.code');
 
-// A temporary placeholder route so you can see a successful redirect
-Route::get('/test/{code}', function ($code) {
-    return "Success! You joined the test with code: " . $code;
-})->name('test.placeholder');
+Route::get('/test/join/{code}', [PublicController::class, 'joinTest'])->name('test.join');
+Route::post('/test/join/{code}', [PublicController::class, 'startTest'])->name('test.start');
+Route::get('/test/session/{token}', [PublicController::class, 'showSession'])->name('test.session');
+Route::post('/test/session/{token}/submit', [PublicController::class, 'submitSession'])->name('test.submit');
+Route::get('/test/session/{token}/results', [PublicController::class, 'showResults'])->name('test.results');
+Route::post('/test/session/{token}/auto-save', [PublicController::class, 'autoSave'])->name('test.session.autosave');
 
 
 Route::middleware('auth')->group(function () {
@@ -26,12 +29,21 @@ Route::middleware('auth')->group(function () {
             ->name('questions.preview');
         Route::post('questions/upload-image', [QuestionController::class, 'uploadImage'])
             ->name('questions.upload-image');
+        Route::get('questions/{question}/set-answer', [QuestionController::class, 'setAnswer'])
+            ->name('questions.set-answer');
+        Route::post('questions/{question}/set-answer', [QuestionController::class, 'storeAnswer'])
+            ->name('questions.store-answer');
 
         Route::resource('tests', TestController::class);
         Route::get('tests/{test}/preview', [TestController::class, 'preview'])
             ->name('tests.preview');
+        Route::post('tests/{test}/toggle', [TestController::class, 'toggle'])
+            ->name('tests.toggle');
 
         Route::resource('codes', AccessCodeController::class);
+
+        Route::get('sessions', [SessionController::class, 'index'])->name('sessions.index');
+        Route::post('sessions/{session}/interrupt', [SessionController::class, 'interrupt'])->name('sessions.interrupt');
     });
 
 

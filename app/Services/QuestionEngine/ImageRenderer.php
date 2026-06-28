@@ -6,16 +6,34 @@ class ImageRenderer
 {
     public function render(string $text): string
     {
-        return preg_replace_callback(
-            "/@img\('([^']+)'\)/",
-            function ($matches) {
+        // Split the text on @img('...') tokens so we can:
+        //   - HTML-encode + nl2br the plain text parts safely
+        //   - Replace the tokens with <img> tags (using signed URLs)
+        // Doing e() before the regex would encode the quotes and break matching.
+        $parts = preg_split("/@img\('([^']+)'\)/", $text, -1, PREG_SPLIT_DELIM_CAPTURE);
 
-                $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
-                $url = \Illuminate\Support\Facades\Storage::disk($disk)->url('questions/' . $matches[1]);
+        $output = '';
+        foreach ($parts as $i => $part) {
+            if ($i % 2 === 0) {
+                // Plain text segment — HTML-encode only; newlines preserved via CSS white-space: pre-wrap
+                $output .= e($part);
+            } else {
+                // $part is the captured filename inside @img('...')
+                $path = 'questions/' . $part;
 
-                return "<img src=\"$url\" class=\"rounded my-3 max-w-full\">";
-            },
-            nl2br(e($text))
-        );
+                if (config('filesystems.default') === 's3') {
+                    $url = \Illuminate\Support\Facades\Storage::disk('s3')->temporaryUrl(
+                        $path,
+                        now()->addMinutes(30)
+                    );
+                } else {
+                    $url = \Illuminate\Support\Facades\Storage::disk('public')->url($path);
+                }
+
+                $output .= "<img src=\"$url\" class=\"rounded my-3\" style=\"max-width: 600px; height: auto; display: block;\">";
+            }
+        }
+
+        return $output;
     }
-}
+}

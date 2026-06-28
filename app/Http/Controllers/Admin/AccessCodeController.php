@@ -25,7 +25,9 @@ class AccessCodeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'test_id' => 'required|exists:tests,id',
+            'type' => 'required|string|in:testing,resource',
+            'test_id' => 'required_if:type,testing|nullable|exists:tests,id',
+            'resource_url' => 'required_if:type,resource|nullable|url',
             'expires_at' => 'nullable|date|after:now',
         ]);
 
@@ -34,17 +36,22 @@ class AccessCodeController extends Controller
             $code = strtoupper(Str::random(6));
         } while (AccessCode::where('code', $code)->exists());
 
-        $rules = [
-            'mix_questions' => $request->has('rules.mix_questions'),
-            'mix_options' => $request->has('rules.mix_options'),
-            'hide_after_submit' => $request->has('rules.hide_after_submit'),
-            'view_answers_after_submit' => $request->has('rules.view_answers_after_submit'),
-            'view_correct_answers' => $request->has('rules.view_correct_answers'),
-        ];
+        $rules = [];
+        if ($request->type === 'testing') {
+            $rules = [
+                'mix_questions' => $request->has('rules.mix_questions'),
+                'mix_options' => $request->has('rules.mix_options'),
+                'hide_after_submit' => $request->has('rules.hide_after_submit'),
+                'view_answers_after_submit' => $request->has('rules.view_answers_after_submit'),
+                'view_correct_answers' => $request->has('rules.view_correct_answers'),
+            ];
+        }
 
         AccessCode::create([
             'code' => $code,
-            'test_id' => $request->test_id,
+            'type' => $request->type,
+            'test_id' => $request->type === 'testing' ? $request->test_id : null,
+            'resource_url' => $request->type === 'resource' ? $request->resource_url : null,
             'expires_at' => $request->expires_at,
             'rules' => $rules,
         ]);

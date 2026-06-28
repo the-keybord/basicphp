@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AccessCode extends Model
 {
-    protected $fillable = ['code', 'test_id', 'expires_at', 'rules'];
+    protected $fillable = ['code', 'test_id', 'expires_at', 'rules', 'type', 'resource_url'];
 
     protected $casts = [
         'rules' => 'array',

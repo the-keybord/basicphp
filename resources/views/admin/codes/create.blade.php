@@ -39,10 +39,19 @@
                 <form action="{{ route('admin.codes.store') }}" method="POST" class="space-y-6">
                     @csrf
 
-                    <!-- Target Test -->
+                    <!-- Code Type -->
                     <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Code Type <span class="text-red-500">*</span></label>
+                        <select name="type" id="code_type" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5" required onchange="toggleCodeTypeFields()">
+                            <option value="testing" {{ old('type') == 'testing' || !old('type') ? 'selected' : '' }}>Testing Session</option>
+                            <option value="resource" {{ old('type') == 'resource' ? 'selected' : '' }}>Resource Link</option>
+                        </select>
+                    </div>
+
+                    <!-- Target Test (Testing Only) -->
+                    <div id="test_selection_container">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Select Target Test <span class="text-red-500">*</span></label>
-                        <select name="test_id" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5" required>
+                        <select name="test_id" id="test_id" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5">
                             <option value="" disabled selected>Choose a generated test blueprint...</option>
                             @foreach($tests as $test)
                                 <option value="{{ $test->id }}" {{ old('test_id', request('test_id')) == $test->id ? 'selected' : '' }}>
@@ -53,6 +62,13 @@
                         <p class="mt-1 text-xs text-gray-500">Students entering this access code will join sessions for the chosen test blueprint.</p>
                     </div>
 
+                    <!-- Resource URL (Resource Only) -->
+                    <div id="resource_url_container" style="display: none;">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Resource URL <span class="text-red-500">*</span></label>
+                        <input type="url" name="resource_url" id="resource_url" value="{{ old('resource_url') }}" placeholder="https://example.com/some-resource" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5">
+                        <p class="mt-1 text-xs text-gray-500">Entering this code will redirect students directly to this external link.</p>
+                    </div>
+
                     <!-- Expiration DateTime -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Expiration Date & Time <span class="text-gray-400 font-normal">(Optional)</span></label>
@@ -60,8 +76,8 @@
                         <p class="mt-1 text-xs text-gray-500">Leave blank for a code that never expires. Otherwise, the code will become invalid after this date and time.</p>
                     </div>
 
-                    <!-- Test Modifiers Checkboxes -->
-                    <div class="border-t border-gray-100 pt-6">
+                    <!-- Test Modifiers Checkboxes (Testing Only) -->
+                    <div class="border-t border-gray-100 pt-6" id="rules_container">
                         <h3 class="text-sm font-bold text-gray-800 mb-3">Versatile Rules & Modifiers</h3>
                         
                         <div class="space-y-3 bg-gray-50 border border-gray-150 rounded-xl p-5">
@@ -122,6 +138,35 @@
                         </button>
                     </div>
                 </form>
+
+                <script>
+                    function toggleCodeTypeFields() {
+                        const type = document.getElementById('code_type').value;
+                        const testSelectionContainer = document.getElementById('test_selection_container');
+                        const testIdSelect = document.getElementById('test_id');
+                        const resourceUrlContainer = document.getElementById('resource_url_container');
+                        const resourceUrlInput = document.getElementById('resource_url');
+                        const rulesContainer = document.getElementById('rules_container');
+
+                        if (type === 'testing') {
+                            testSelectionContainer.style.display = 'block';
+                            testIdSelect.required = true;
+                            resourceUrlContainer.style.display = 'none';
+                            resourceUrlInput.required = false;
+                            rulesContainer.style.display = 'block';
+                        } else {
+                            testSelectionContainer.style.display = 'none';
+                            testIdSelect.required = false;
+                            resourceUrlContainer.style.display = 'block';
+                            resourceUrlInput.required = true;
+                            rulesContainer.style.display = 'none';
+                        }
+                    }
+
+                    document.addEventListener('DOMContentLoaded', () => {
+                        toggleCodeTypeFields();
+                    });
+                </script>
 
             </div>
         </div>

@@ -66,9 +66,7 @@
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2">Student View Mockup</span>
                     
                     <!-- Question Text -->
-                    <div class="text-xl font-medium text-gray-800 leading-relaxed">
-                        {!! $parsed['text'] !!}
-                    </div>
+                    <pre class="text-xl font-medium text-gray-800 leading-relaxed" style="font-family:inherit;white-space:pre-wrap;margin:0;padding:0;background:transparent;border:none;overflow:visible;"@if($question->question_type === 'drag_and_drop') id="dnd-question-text" @endif>{!! $parsed['text'] !!}</pre>
 
                     <!-- Question Image (if any) -->
                     @if(!empty($parsed['image']))
@@ -166,60 +164,43 @@
                             </div>
                         @endif
 
-                    <!-- DRAG AND DROP (MATCHING PAIRS / REORDERING) -->
+                    <!-- DRAG AND DROP — Fill in the Blank -->
                     @elseif($question->question_type === 'drag_and_drop')
-                        @php
-                            $isMatching = count($parsed['options']) > 0 && is_array($parsed['options'][0]) && isset($parsed['options'][0]['left']);
-                        @endphp
+                        <div class="space-y-5">
+                            <p class="text-xs text-gray-500 italic">
+                                Drag tiles into the
+                                <span class="inline-flex items-center px-2 py-0.5 rounded border border-dashed border-amber-400 bg-amber-50 text-amber-700 font-bold text-xs mx-0.5">__ blank slots</span>
+                                in the text above. Click a placed tile to return it to the pool.
+                            </p>
 
-                        @if($isMatching)
-                            <!-- Drag & Drop Matching Layout -->
-                            <div class="space-y-6">
-                                <p class="text-xs text-gray-500 italic">Drag the definitions from the pool below and drop them next to the correct terms.</p>
-                                
-                                <div class="space-y-4">
-                                    @foreach($parsed['options'] as $index => $pair)
-                                        <div class="flex items-center gap-4 bg-gray-50 p-4 border border-gray-100 rounded-xl">
-                                            <!-- Left item -->
-                                            <div class="w-1/3 font-bold text-gray-800 text-sm md:text-base border-r border-gray-200 pr-2">
-                                                {!! $pair['left'] !!}
-                                            </div>
-                                            <!-- Drop target zone -->
-                                            <div class="flex-grow dropzone h-14 bg-white border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center text-xs font-semibold text-gray-400 tracking-wider hover:border-amber-400 transition" data-match-id="{{ $index }}">
-                                                Drop matching item here
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-
-                                <!-- Draggable items pool -->
-                                <div class="mt-6 p-5 border border-dashed border-gray-200 rounded-xl bg-gray-50/30">
-                                    <h4 class="font-bold text-xs text-gray-500 uppercase mb-3">Options Pool</h4>
-                                    <div class="flex flex-wrap gap-2.5" id="draggable-pool">
-                                        @foreach(collect($parsed['options'])->shuffle() as $pair)
-                                            <div class="drag-item bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 font-semibold px-4 py-2.5 rounded-lg text-xs md:text-sm cursor-grab active:cursor-grabbing shadow-sm select-none transition" draggable="true" data-text="{!! strip_tags($pair['right']) !!}">
-                                                {!! $pair['right'] !!}
-                                            </div>
-                                        @endforeach
+                            <!-- Answer pool + cancel zone side by side -->
+                            <div class="p-5 border-2 border-dashed border-amber-200 rounded-2xl bg-amber-50/20 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <p class="text-xs font-bold text-amber-500/80 uppercase tracking-widest">Answer Tiles</p>
+                                        <button type="button" onclick="resetDndTiles()" class="px-2.5 py-1 bg-amber-200/60 hover:bg-amber-200 text-amber-900 font-bold text-xxs rounded-lg transition-all flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 11H18.21"/></svg>
+                                            Reset Tiles
+                                        </button>
+                                    </div>
+                                    <!-- Cancel drop zone: only visible while dragging -->
+                                    <div id="dnd-cancel"
+                                         style="display:none;"
+                                         class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-dashed border-red-300 bg-red-50 text-red-500 font-bold text-xs select-none transition-all">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        Drop here to cancel
                                     </div>
                                 </div>
-                            </div>
-                        @else
-                            <!-- Drag & Drop Sortable Ordering Layout -->
-                            <div class="space-y-4">
-                                <p class="text-xs text-gray-500 italic">Drag and reorder the options vertically to set the sequence.</p>
-                                <div class="space-y-2.5" id="sortable-list">
-                                    @foreach($parsed['options'] as $index => $option)
-                                        <div class="sort-item flex items-center bg-gray-50 hover:bg-gray-100 border border-gray-200 p-4 rounded-xl cursor-move shadow-sm select-none transition group" draggable="true">
-                                            <svg class="w-5 h-5 text-gray-400 group-hover:text-gray-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                                            </svg>
-                                            <span class="text-gray-700 font-medium">{!! $option !!}</span>
+                                <div class="flex flex-wrap gap-2.5" id="dnd-pool">
+                                    @foreach($parsed['options'] as $option)
+                                        <div class="dnd-tile bg-white hover:bg-amber-50 border-2 border-amber-300 text-amber-900 font-bold px-5 py-2.5 rounded-xl text-sm cursor-grab active:cursor-grabbing shadow-sm select-none transition-all hover:shadow-md hover:border-amber-400"
+                                             draggable="true">
+                                            {!! $option !!}
                                         </div>
                                     @endforeach
                                 </div>
                             </div>
-                        @endif
+                        </div>
                     @endif
                 </div>
             </div>
@@ -255,7 +236,7 @@
         </div>
     </div>
 
-    <!-- Drag & Drop matching logic script -->
+    <!-- Fill-in-Blank Drag & Drop + Answer Toggle -->
     <script>
         function toggleAnswer() {
             const content = document.getElementById('answer-content');
@@ -269,97 +250,198 @@
             }
         }
 
+        let globalDragging = null;
+
+        function resetDndTiles() {
+            const textEl = document.getElementById('dnd-question-text');
+            const pool = document.getElementById('dnd-pool');
+            if (!textEl || !pool) return;
+            
+            textEl.querySelectorAll('.dnd-slot').forEach(slot => {
+                const tile = slot.querySelector('.dnd-tile');
+                if (tile) {
+                    tile.draggable = true;
+                    tile.style.cursor = '';
+                    tile.style.opacity = '1';
+                    tile.title = '';
+                    tile.onclick = null;
+                    
+                    // Re-register drag start/end to be safe
+                    tile.addEventListener('dragstart', e => {
+                        globalDragging = tile;
+                        setTimeout(() => (tile.style.opacity = '0.4'), 0);
+                        e.dataTransfer.effectAllowed = 'move';
+                        const cancelZone = document.getElementById('dnd-cancel');
+                        if (cancelZone) cancelZone.style.display = 'flex';
+                    });
+                    
+                    pool.appendChild(tile);
+                    slot.innerHTML = '&nbsp;?&nbsp;';
+                    
+                    // Reset slot styles
+                    slot.style.minWidth    = '64px';
+                    slot.style.height      = '26px';
+                    slot.style.minHeight   = '';
+                    slot.style.borderStyle = 'dashed';
+                    slot.style.borderColor = '#f59e0b';
+                    slot.style.background  = '#fffbeb';
+                    slot.style.padding     = '0 8px';
+                }
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
-            // Drag and drop matching handler
-            const dragItems = document.querySelectorAll('.drag-item');
-            const dropzones = document.querySelectorAll('.dropzone');
-            let activeDragElement = null;
-
-            dragItems.forEach(item => {
-                item.addEventListener('dragstart', (e) => {
-                    activeDragElement = item;
-                    e.dataTransfer.setData('text/plain', item.getAttribute('data-text'));
-                    item.classList.add('opacity-50');
-                });
-
-                item.addEventListener('dragend', () => {
-                    item.classList.remove('opacity-50');
-                    activeDragElement = null;
-                });
-            });
-
-            dropzones.forEach(zone => {
-                zone.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    zone.classList.add('border-amber-400', 'bg-amber-50/10');
-                });
-
-                zone.addEventListener('dragleave', () => {
-                    zone.classList.remove('border-amber-400', 'bg-amber-50/10');
-                });
-
-                zone.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    zone.classList.remove('border-amber-400', 'bg-amber-50/10');
-
-                    if (activeDragElement) {
-                        // Clear text and append element
-                        zone.innerHTML = '';
-                        const clone = activeDragElement.cloneNode(true);
-                        clone.classList.remove('shadow-sm', 'cursor-grab', 'px-4', 'py-2.5');
-                        clone.classList.add('w-full', 'h-full', 'flex', 'items-center', 'justify-center', 'text-center', 'font-bold');
-                        clone.setAttribute('draggable', 'false');
-                        zone.appendChild(clone);
-
-                        // Remove from original pool
-                        activeDragElement.remove();
-                    }
-                });
-            });
-
-            // Sortable ordering handler
-            const sortList = document.getElementById('sortable-list');
-            if (sortList) {
-                let dragItem = null;
-
-                sortList.addEventListener('dragstart', (e) => {
-                    dragItem = e.target.closest('.sort-item');
-                    if (dragItem) {
-                        setTimeout(() => dragItem.classList.add('opacity-40'), 0);
-                    }
-                });
-
-                sortList.addEventListener('dragend', (e) => {
-                    if (dragItem) {
-                        dragItem.classList.remove('opacity-40');
-                        dragItem = null;
-                    }
-                });
-
-                sortList.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    const afterElement = getDragAfterElement(sortList, e.clientY);
-                    if (afterElement == null) {
-                        sortList.appendChild(dragItem);
-                    } else {
-                        sortList.insertBefore(dragItem, afterElement);
-                    }
-                });
-            }
-
-            function getDragAfterElement(container, y) {
-                const draggableElements = [...container.querySelectorAll('.sort-item:not(.opacity-40)')];
-
-                return draggableElements.reduce((closest, child) => {
-                    const box = child.getBoundingClientRect();
-                    const offset = y - box.top - box.height / 2;
-                    if (offset < 0 && offset > closest.offset) {
-                        return { offset: offset, element: child };
-                    } else {
-                        return closest;
-                    }
-                }, { offset: Number.NEGATIVE_INFINITY }).element;
-            }
+            initFillBlankDnD(
+                document.getElementById('dnd-question-text'),
+                document.getElementById('dnd-pool')
+            );
         });
+
+        function initFillBlankDnD(textEl, pool) {
+            if (!textEl || !pool) return;
+
+            const cancelZone = document.getElementById('dnd-cancel');
+            let slotIdx = 0;
+
+            // Replace every __ in the rendered text with a styled drop zone
+            textEl.innerHTML = textEl.innerHTML.replace(/__/g, () => {
+                return `<span class="dnd-slot" data-slot="${slotIdx++}"
+                              style="display:inline-flex;min-width:64px;height:26px;
+                                     border:2px dashed #f59e0b;border-radius:6px;
+                                     padding:0 8px;margin:0 3px;background:#fffbeb;
+                                     vertical-align:middle;align-items:center;justify-content:center;
+                                     color:#d97706;font-size:0.75rem;font-weight:700;
+                                     transition:all 0.15s;cursor:pointer;"
+                              >&nbsp;?&nbsp;</span>`;
+            });
+
+            function setupTile(tile) {
+                tile.draggable = true;
+                tile.style.cursor = '';
+                tile.onclick = null;
+                tile.addEventListener('dragstart', e => {
+                    globalDragging = tile;
+                    setTimeout(() => (tile.style.opacity = '0.4'), 0);
+                    e.dataTransfer.effectAllowed = 'move';
+                    if (cancelZone) {
+                        cancelZone.style.display = 'flex';
+                    }
+                });
+                tile.addEventListener('dragend', () => {
+                    tile.style.opacity = '1';
+                    globalDragging = null;
+                    if (cancelZone) {
+                        cancelZone.style.display = 'none';
+                        cancelZone.style.borderColor = '#fca5a5';
+                        cancelZone.style.background  = '#fef2f2';
+                    }
+                });
+            }
+
+            pool.querySelectorAll('.dnd-tile').forEach(setupTile);
+
+            // Cancel zone: drop a tile here to return it to the pool
+            if (cancelZone) {
+                cancelZone.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    cancelZone.style.borderColor = '#ef4444';
+                    cancelZone.style.background  = '#fee2e2';
+                });
+                cancelZone.addEventListener('dragleave', e => {
+                    if (!cancelZone.contains(e.relatedTarget)) {
+                        cancelZone.style.borderColor = '#fca5a5';
+                        cancelZone.style.background  = '#fef2f2';
+                    }
+                });
+                cancelZone.addEventListener('drop', e => {
+                    e.preventDefault();
+                    if (!globalDragging) return;
+                    // Find the slot that holds this tile (if any) and clear it
+                    const parentSlot = globalDragging.closest('.dnd-slot');
+                    if (parentSlot) sendToPool(globalDragging, parentSlot, true);
+                    else {
+                        globalDragging.style.opacity = '1';
+                        globalDragging.draggable = true;
+                        globalDragging.style.cursor = '';
+                        globalDragging.onclick = null;
+                        setupTile(globalDragging);
+                        pool.appendChild(globalDragging);
+                    }
+                    globalDragging = null;
+                    cancelZone.style.display = 'none';
+                });
+            }
+
+            textEl.querySelectorAll('.dnd-slot').forEach(slot => {
+                slot.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    slot.style.borderColor = '#818cf8';
+                    slot.style.borderStyle = 'solid';
+                    slot.style.background  = '#eef2ff';
+                });
+
+                slot.addEventListener('dragleave', e => {
+                    if (!slot.contains(e.relatedTarget)) {
+                        const hasTile = !!slot.querySelector('.dnd-tile');
+                        if (!hasTile) resetSlotStyle(slot);
+                        else {
+                            slot.style.borderColor = '#818cf8';
+                            slot.style.background  = '#eef2ff';
+                        }
+                    }
+                });
+
+                slot.addEventListener('drop', e => {
+                    e.preventDefault();
+                    if (!globalDragging) return;
+
+                    // If the slot already has a tile, return it to pool first
+                    const prev = slot.querySelector('.dnd-tile');
+                    if (prev) sendToPool(prev, slot, false);
+
+                    // Place the dragged tile inside the slot
+                    globalDragging.style.opacity = '1';
+                    globalDragging.style.cursor  = 'pointer';
+                    globalDragging.draggable     = false;
+                    globalDragging.title         = 'Click to return to pool';
+                    globalDragging.onclick       = () => sendToPool(globalDragging, slot, true);
+
+                    slot.innerHTML      = '';
+                    slot.style.minWidth = 'auto';
+                    slot.style.borderStyle = 'solid';
+                    slot.style.borderColor = '#818cf8';
+                    slot.style.background  = '#eef2ff';
+                    slot.style.padding     = '0 4px';
+                    slot.style.height      = 'auto';
+                    slot.style.minHeight   = '26px';
+                    slot.appendChild(globalDragging);
+                    globalDragging = null;
+                });
+            });
+
+            function sendToPool(tile, slot, clearSlot) {
+                tile.draggable = true;
+                tile.style.cursor = '';
+                tile.style.opacity = '1';
+                tile.title = '';
+                tile.onclick = null;
+                setupTile(tile);
+                pool.appendChild(tile);
+                if (clearSlot) {
+                    slot.innerHTML = '&nbsp;?&nbsp;';
+                    resetSlotStyle(slot);
+                }
+            }
+
+            function resetSlotStyle(slot) {
+                slot.style.minWidth    = '64px';
+                slot.style.height      = '26px';
+                slot.style.minHeight   = '';
+                slot.style.borderStyle = 'dashed';
+                slot.style.borderColor = '#f59e0b';
+                slot.style.background  = '#fffbeb';
+                slot.style.padding     = '0 8px';
+            }
+        }
     </script>
 </x-app-layout>

@@ -27,6 +27,10 @@
                     <x-nav-link :href="route('admin.codes.index')" :active="request()->routeIs('admin.codes.*')">
                         {{ __('Access Codes') }}
                     </x-nav-link>
+
+                    <x-nav-link :href="route('admin.sessions.index')" :active="request()->routeIs('admin.sessions.*')">
+                        {{ __('Sessions') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -90,6 +94,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('admin.codes.index')" :active="request()->routeIs('admin.codes.*')">
                 {{ __('Access Codes') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.sessions.index')" :active="request()->routeIs('admin.sessions.*')">
+                {{ __('Sessions') }}
             </x-responsive-nav-link>
         </div>
 

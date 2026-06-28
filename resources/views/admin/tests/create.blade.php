@@ -41,9 +41,15 @@
                 <!-- Test Details Card -->
                 <div class="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
                     <h3 class="text-lg font-bold text-gray-800 mb-4">Test Settings</h3>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Test Name <span class="text-red-500">*</span></label>
-                        <input type="text" name="name" value="{{ old('name') }}" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2.5" placeholder="e.g. Midterm Databases Exam 2026" required>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Test Name <span class="text-red-500">*</span></label>
+                            <input type="text" name="name" value="{{ old('name') }}" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2.5" placeholder="e.g. Midterm Databases Exam 2026" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Test Duration (Minutes) <span class="text-red-500">*</span></label>
+                            <input type="number" name="duration_minutes" id="duration_minutes" min="1" value="{{ old('duration_minutes', $categories->first()->default_test_time ?? 45) }}" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2.5" required>
+                        </div>
                     </div>
                 </div>
 
@@ -77,7 +83,7 @@
                                                 <input 
                                                     type="number" 
                                                     name="questions[{{ $sub->id }}]" 
-                                                    value="{{ old('questions.'.$sub->id, 0) }}"
+                                                    value="{{ old('questions.'.$sub->id, min($sub->default_test_size ?? 8, $sub->primary_questions_count)) }}"
                                                     min="0" 
                                                     max="{{ $sub->primary_questions_count }}"
                                                     class="count-input w-20 border-gray-300 rounded-lg text-center font-bold text-gray-800 focus:ring-blue-500 focus:border-blue-500 p-1.5"

@@ -29,6 +29,15 @@ class QuestionParser
             $text = trim((string)$question->text);
         }
 
+        // Also capture any @img() tokens sitting as raw text nodes directly inside
+        // <question> but outside of <text> (e.g. placed between </text> and <option>).
+        // Strip all XML tags from the raw input and search for floating @img() tokens.
+        $rawStripped = preg_replace('/<[^>]+>/', '', $xml);
+        preg_match_all("/@img\('[^']+'\)/", $rawStripped, $floatingImgs);
+        if (!empty($floatingImgs[0])) {
+            $text .= "\n" . implode("\n", $floatingImgs[0]);
+        }
+
         $options = [];
         $optionElements = null;
 

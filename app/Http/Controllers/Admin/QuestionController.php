@@ -37,15 +37,14 @@ class QuestionController extends Controller
             'secondary_subcategory_id' => 'nullable|different:primary_subcategory_id|exists:subcategories,id',
             'question_type' => 'required|string|in:multiselect,singleselect,dropdown,drag_and_drop,truefalse',
             'xml_content' => 'required|string',
-            'correct_answer_string' => 'nullable|string|max:255',
         ]);
 
         $validated['xml_content'] = $this->processXmlContent($validated['xml_content']);
 
-        Question::create($validated);
+        $question = Question::create($validated);
 
-        return redirect()->route('admin.questions.index')
-            ->with('success', 'Question added successfully! Any embedded base64 images were extracted.');
+        return redirect()->route('admin.questions.set-answer', $question)
+            ->with('success', 'Question metadata saved! Now, please select the correct answer below.');
     }
 
     public function edit(Question $question)
@@ -61,15 +60,42 @@ class QuestionController extends Controller
             'secondary_subcategory_id' => 'nullable|different:primary_subcategory_id|exists:subcategories,id',
             'question_type' => 'required|string|in:multiselect,singleselect,dropdown,drag_and_drop,truefalse',
             'xml_content' => 'required|string',
-            'correct_answer_string' => 'nullable|string|max:255',
         ]);
 
         $validated['xml_content'] = $this->processXmlContent($validated['xml_content']);
 
         $question->update($validated);
 
+        return redirect()->route('admin.questions.set-answer', $question)
+            ->with('success', 'Question metadata updated! Now, please select/verify the correct answer below.');
+    }
+
+    public function setAnswer(Question $question)
+    {
+        $parser = new QuestionParser();
+        $renderer = new QuestionRenderer();
+
+        $parsed = $parser->parse($question->xml_content);
+        $parsed = $renderer->render($parsed);
+
+        return view('admin.questions.set-answer', compact('parsed', 'question'));
+    }
+
+    public function storeAnswer(Request $request, Question $question)
+    {
+        $validated = $request->validate([
+            'correct_answer_string' => 'nullable|string|max:1000',
+        ]);
+
+        $driver = \App\Services\QuestionEngine\Drivers\QuestionDriverFactory::make($question->question_type);
+        $formattedAnswer = $driver->formatAnswer($validated['correct_answer_string'] ?? '');
+
+        $question->update([
+            'correct_answer_string' => $formattedAnswer,
+        ]);
+
         return redirect()->route('admin.questions.index')
-            ->with('success', 'Question updated successfully!');
+            ->with('success', 'Question correct answer configured successfully!');
     }
 
     public function destroy(Question $question)
@@ -94,17 +120,18 @@ class QuestionController extends Controller
     }
 
     /**
-     * Extracts embedded base64 images, decodes and saves them to local storage,
-     * and returns the updated XML with public storage URLs.
+     * Extracts embedded base64 images, decodes and saves them to storage,
+     * and replaces the <img src="data:..."> with an @img('filename') token
+     * so the renderer can generate a signed URL at preview time.
      */
     protected function processXmlContent(string $xmlContent): string
     {
-        // This looks for: src="data:image/png;base64,iVBORw0KGgo..."
-        $pattern = '/src=["\']data:image\/([^;]+);base64,([^"\']+)["\']/i';
+        // Match full <img ...> tags that contain a base64 src attribute
+        $pattern = '/<img[^>]*src=["\']data:image\/([^;]+);base64,([^"\']+)["\'][^>]*>/i';
 
         return preg_replace_callback($pattern, function ($matches) {
             $extension = $matches[1]; // e.g. png, jpeg, gif
-            $base64Data = $matches[2]; // Base64 raw block
+            $base64Data = $matches[2];
 
             $imageBinary = base64_decode($base64Data);
             if ($imageBinary === false) {
@@ -112,30 +139,95 @@ class QuestionController extends Controller
             }
 
             $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
-            $filename = 'questions/' . Str::uuid() . '.' . $extension;
-            Storage::disk($disk)->put($filename, $imageBinary);
+            $uuid = Str::uuid();
+            $storagePath = 'questions/' . $uuid . '.' . $extension;
+            Storage::disk($disk)->put($storagePath, $imageBinary);
 
-            $publicUrl = Storage::disk($disk)->url($filename);
-            return 'src="' . $publicUrl . '"';
+            // Store only the token — signed URL is generated at render time
+            return "@img('{$uuid}.{$extension}')";
         }, $xmlContent);
     }
 
     public function uploadImage(Request $request)
     {
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'image' => 'required|image|max:20480',
         ]);
 
         if ($request->hasFile('image')) {
-            $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
-            $path = $request->file('image')->store('questions', $disk);
+            $disk     = config('filesystems.default') === 's3' ? 's3' : 'public';
+            $file     = $request->file('image');
+            $filename = Str::uuid() . '.jpg';
+            $storagePath = 'questions/' . $filename;
+
+            // Resize with GD (built-in PHP, no extra dependency)
+            $imageData = $this->resizeImage($file->getRealPath(), 1400, 85);
+
+            Storage::disk($disk)->put($storagePath, $imageData);
+
+            // Short-lived signed URL for the editor thumbnail preview only.
+            if ($disk === 's3') {
+                $previewUrl = Storage::disk('s3')->temporaryUrl($storagePath, now()->addMinutes(30));
+            } else {
+                $previewUrl = Storage::disk('public')->url($storagePath);
+            }
+
             return response()->json([
-                'success' => true,
-                'url' => Storage::disk($disk)->url($path),
-                'filename' => basename($path),
+                'success'     => true,
+                'preview_url' => $previewUrl,
+                'filename'    => $filename,
             ]);
         }
 
         return response()->json(['success' => false, 'message' => 'No file uploaded'], 400);
+    }
+
+    /**
+     * Resize an image to fit within $maxDimension x $maxDimension (maintains aspect ratio)
+     * and re-encode as JPEG at the given quality. Uses PHP GD (always available).
+     */
+    protected function resizeImage(string $sourcePath, int $maxDimension, int $quality): string
+    {
+        [$origW, $origH, $type] = getimagesize($sourcePath);
+
+        // Create source image from the original
+        $src = match ($type) {
+            IMAGETYPE_JPEG => imagecreatefromjpeg($sourcePath),
+            IMAGETYPE_PNG  => imagecreatefrompng($sourcePath),
+            IMAGETYPE_GIF  => imagecreatefromgif($sourcePath),
+            IMAGETYPE_WEBP => imagecreatefromwebp($sourcePath),
+            IMAGETYPE_BMP  => imagecreatefrombmp($sourcePath),
+            default        => imagecreatefromjpeg($sourcePath),
+        };
+
+        // Calculate new dimensions keeping aspect ratio
+        if ($origW > $maxDimension || $origH > $maxDimension) {
+            $ratio  = min($maxDimension / $origW, $maxDimension / $origH);
+            $newW   = (int) round($origW * $ratio);
+            $newH   = (int) round($origH * $ratio);
+        } else {
+            $newW = $origW;
+            $newH = $origH;
+        }
+
+        $dst = imagecreatetruecolor($newW, $newH);
+
+        // Preserve transparency for PNG/GIF
+        imagealphablending($dst, false);
+        imagesavealpha($dst, true);
+        $transparent = imagecolorallocatealpha($dst, 0, 0, 0, 127);
+        imagefill($dst, 0, 0, $transparent);
+
+        imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+
+        // Capture output as JPEG
+        ob_start();
+        imagejpeg($dst, null, $quality);
+        $jpeg = ob_get_clean();
+
+        imagedestroy($src);
+        imagedestroy($dst);
+
+        return $jpeg;
     }
 }

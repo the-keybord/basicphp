@@ -32,6 +32,7 @@ class TestController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'duration_minutes' => 'required|integer|min:1',
             'questions' => 'required|array', // subcategory_id => count
         ]);
 
@@ -58,10 +59,11 @@ class TestController extends Controller
         Test::create([
             'name' => $request->name,
             'question_ids' => $questionIds,
+            'duration_minutes' => $request->duration_minutes,
         ]);
 
         return redirect()->route('admin.tests.index')
-            ->with('success', 'Test generated successfully with ' . count($questionIds) . ' random questions!');
+            ->with('success', 'Test generated successfully with ' . count($questionIds) . ' random questions and a ' . $request->duration_minutes . ' min duration limit!');
     }
 
     public function preview(Test $test)
@@ -96,5 +98,15 @@ class TestController extends Controller
         $test->delete();
         return redirect()->route('admin.tests.index')
             ->with('success', 'Test deleted successfully!');
+    }
+
+    public function toggle(Test $test)
+    {
+        $test->update([
+            'is_active' => !$test->is_active,
+        ]);
+
+        $status = $test->is_active ? 'activated' : 'deactivated';
+        return back()->with('success', "Test '{$test->name}' has been {$status} successfully!");
     }
 }

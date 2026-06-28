@@ -90,13 +90,6 @@
                                 <option value="truefalse" {{ old('question_type', $question->question_type) == 'truefalse' ? 'selected' : '' }}>True/False</option>
                             </select>
                         </div>
-
-                        <!-- Correct Answer String -->
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Correct Answer String <span class="text-red-500">*</span></label>
-                            <input type="text" name="correct_answer_string" value="{{ old('correct_answer_string', $question->correct_answer_string) }}" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5" placeholder="e.g. A, B or True or DDL:Data Definition Language" required>
-                            <p class="mt-1 text-xs text-gray-500">The exact correct answer(s). Format depends on the question type. Keep this outside of the XML content.</p>
-                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -177,7 +170,7 @@
             singleselect: `<question>\n    <text>What is the default port for PostgreSQL databases?</text>\n    <option>3306</option>\n    <option>5432</option>\n    <option>1433</option>\n    <option>1521</option>\n</question>`,
             multiselect: `<question>\n    <text>Select all properties of a primary key:</text>\n    <option>Must contain unique values</option>\n    <option>Cannot contain NULL values</option>\n    <option>A table can have multiple primary keys</option>\n    <option>Speeds up query operations</option>\n</question>`,
             dropdown: `<question>\n    <text>To filter the results of a GROUP BY operation, you should use the _____ clause.</text>\n    <option>WHERE</option>\n    <option>HAVING</option>\n    <option>FILTER</option>\n</question>`,
-            drag_and_drop: `<question>\n    <text>Match these SQL commands with their category:</text>\n    <option>\n        <left>SELECT</left>\n        <right>DML (Data Manipulation)</right>\n    </option>\n    <option>\n        <left>CREATE TABLE</left>\n        <right>DDL (Data Definition)</right>\n    </option>\n    <option>\n        <left>GRANT</left>\n        <right>DCL (Data Control)</right>\n    </option>\n</question>`,
+            drag_and_drop: `<question>\n    <text>A __ key uniquely identifies a row, while a __ key links two tables together. Indexes __ query performance.</text>\n    <option>primary</option>\n    <option>foreign</option>\n    <option>improve</option>\n    <option>worsen</option>\n</question>`,
             truefalse: `<question>\n    <text>A Foreign Key constraint must always reference a Primary Key in another table.</text>\n    <option>True</option>\n    <option>False</option>\n</question>`
         };
 
@@ -274,7 +267,7 @@
                         card.className = 'relative border border-gray-200 rounded-lg p-1 bg-white hover:shadow-sm transition flex flex-col group';
                         card.innerHTML = `
                             <div class="h-12 w-full rounded overflow-hidden bg-gray-100 flex items-center justify-center relative">
-                                <img src="${data.url}" class="h-full object-cover">
+                                <img src="${data.preview_url}" class="h-full object-cover">
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
                                     <button type="button" onclick="insertImageToken('${data.filename}')" class="bg-blue-600 hover:bg-blue-700 text-white text-xxs font-bold py-0.5 px-1.5 rounded shadow transition">
                                         Insert
