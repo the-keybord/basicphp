@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ESP32 Motor Control</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body {
+    font-family: sans-serif;
+    background: #f7f9fc;
+    text-align: center;
+    margin: 0;
+    padding: 1rem;
+  }
+  h2 { color: #333; margin-bottom: 0.3rem; }
+  p { color: #555; margin-bottom: 1.2rem; }
+
+  .controller {
+    display: grid;
+    grid-template-columns: repeat(3, 80px);
+    grid-template-rows: repeat(3, 80px);
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    max-width: 280px;
+  }
+
+  .btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
+  .btn:active {
+    background: #0056b3;
+    transform: scale(0.95);
+  }
+  .empty { background: none; box-shadow: none; cursor: default; }
+
+  @media (max-width: 480px) {
+    .controller {
+      grid-template-columns: repeat(3, 70px);
+      grid-template-rows: repeat(3, 70px);
+    }
+    .btn { font-size: 1.8rem; }
+  }
+</style>
+</head>
+<body>
+<h2>ESP32 + TC1508 Motor Control</h2>
+<p>Use arrow keys or touch the buttons below to control the motors.</p>
+
+<div class="controller">
+  <div class="empty"></div>
+  <button class="btn" id="btnUp">▲</button>
+  <div class="empty"></div>
+  <button class="btn" id="btnLeft">◀</button>
+  <button class="btn" id="btnStop">⏹</button>
+  <button class="btn" id="btnRight">▶</button>
+  <div class="empty"></div>
+  <button class="btn" id="btnDown">▼</button>
+  <div class="empty"></div>
+</div>
+
+<script>
+let ws = new WebSocket("ws://192.168.4.1:81/");
+ws.onopen = () => console.log("Connected to ESP32 WebSocket");
+
+function send(cmd) {
+  if (ws.readyState === WebSocket.OPEN) {
+    ws.send(cmd);
+    console.log("Sent:", cmd);
+  }
+}
+
+// --- Keyboard control ---
+let keyPressed = {};
+const keyMap = {
+  "ArrowUp": "fwd",
+  "ArrowDown": "back",
+  "ArrowLeft": "left",
+  "ArrowRight": "right"
+};
+
+document.addEventListener("keydown", (event) => {
+  const cmd = keyMap[event.key];
+  if (cmd && !keyPressed[event.key]) {
+    send(cmd);
+    keyPressed[event.key] = true;
+  }
+});
+
+document.addEventListener("keyup", (event) => {
+  if (keyMap[event.key]) {
+    send("stop");
+    keyPressed[event.key] = false;
+  }
+});
+
+// --- Touch buttons ---
+function addButtonControl(id, cmd) {
+  const btn = document.getElementById(id);
+  btn.addEventListener("mousedown", () => send(cmd));
+  btn.addEventListener("mouseup", () => send("stop"));
+  btn.addEventListener("touchstart", (e) => { e.preventDefault(); send(cmd); });
+  btn.addEventListener("touchend", (e) => { e.preventDefault(); send("stop"); });
+}
+
+addButtonControl("btnUp", "fwd");
+addButtonControl("btnDown", "back");
+addButtonControl("btnLeft", "left");
+addButtonControl("btnRight", "right");
+addButtonControl("btnStop", "stop");
+</script>
+</body>
+</html>
