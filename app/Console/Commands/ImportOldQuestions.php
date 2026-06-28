@@ -21,6 +21,9 @@ class ImportOldQuestions extends Command
             return 1;
         }
 
+        // Clean up previously imported questions to avoid duplication and update structures cleanly
+        Question::where('id', '>=', 39)->delete();
+
         $directories = File::directories($oldQuestionsPath);
         $this->info("Found " . count($directories) . " question directories.");
 
@@ -60,7 +63,22 @@ class ImportOldQuestions extends Command
                 $type = 'multiselect';
             }
 
-            // 2. Extract question text & image
+            // 2. Pre-process drag-and-drop tiles from bracket expressions
+            $options = [];
+            $subjects = [];
+
+            if ($type === 'drag_and_drop') {
+                if (preg_match('/{{{(.+?)}}}/s', $html, $ddMatches)) {
+                    $poolText = $ddMatches[1];
+                    // Strip optional code wrappers
+                    $poolText = preg_replace('/<\/?code>/i', '', $poolText);
+                    $options = array_map('trim', explode('|||', $poolText));
+                    // Remove tiles list bracket block from input
+                    $html = str_replace($ddMatches[0], '', $html);
+                }
+            }
+
+            // 3. Extract question text & image
             // Look for <div class='question'>...</div>
             preg_match('/<div class=[\'"]question[\'"]>(.+?)<\/div>/s', $html, $qMatch);
             $questionHtml = $qMatch[1] ?? '';
@@ -110,18 +128,17 @@ class ImportOldQuestions extends Command
             }
             $text = htmlspecialchars_decode($text, ENT_QUOTES);
 
-            // 3. Extract options/subjects and prepare XML content
-            $options = [];
-            $subjects = [];
+            // 4. Parse options/subjects for standard questions
+            if ($type !== 'drag_and_drop') {
+                preg_match_all('/<div class=[\'"]option[\'"]>(.+?)<\/div>/s', $html, $optMatches);
+                $rawOptions = $optMatches[1] ?? [];
 
-            preg_match_all('/<div class=[\'"]option[\'"]>(.+?)<\/div>/s', $html, $optMatches);
-            $rawOptions = $optMatches[1] ?? [];
-
-            foreach ($rawOptions as $opt) {
-                $cleanedOpt = preg_replace('/<\/?code>/i', '', $opt);
-                $cleanedOpt = str_replace(['<br />', '<br>', '<br/>'], "\n", $cleanedOpt);
-                $cleanedOpt = htmlspecialchars_decode(trim($cleanedOpt), ENT_QUOTES);
-                $options[] = $cleanedOpt;
+                foreach ($rawOptions as $opt) {
+                    $cleanedOpt = preg_replace('/<\/?code>/i', '', $opt);
+                    $cleanedOpt = str_replace(['<br />', '<br>', '<br/>'], "\n", $cleanedOpt);
+                    $cleanedOpt = htmlspecialchars_decode(trim($cleanedOpt), ENT_QUOTES);
+                    $options[] = $cleanedOpt;
+                }
             }
 
             // Handle specific type conversions
@@ -153,7 +170,9 @@ class ImportOldQuestions extends Command
                 // Guess correct answer
                 $guess = implode(', ', $guessParts);
             } elseif ($type === 'drag_and_drop') {
-                // Drag and drop options represent tiles
+                // Normalize legacy blanks "___" to double underscores "__" for S3 Drag Engine compatibility
+                $text = preg_replace('/___+/i', '__', $text);
+                
                 // Guess: first 2 options or just comma-separated options
                 $guess = implode(', ', array_slice($options, 0, 2));
             } elseif ($type === 'multiselect') {
@@ -164,7 +183,7 @@ class ImportOldQuestions extends Command
                 $guess = $options[0] ?? '';
             }
 
-            // 4. Construct XML representation
+            // 5. Construct XML representation
             $xml = "<question>\n";
             $xml .= "<text>" . htmlspecialchars($text, ENT_QUOTES) . "</text>\n";
             if (!empty($imagePath)) {
@@ -198,7 +217,7 @@ class ImportOldQuestions extends Command
             }
             $xml .= "</question>";
 
-            // 5. Guess subcategory based on keyword analysis
+            // 6. Guess subcategory based on keyword analysis
             $subId = $subcategories['design']; // Default
             $textLower = strtolower($text);
             
@@ -214,7 +233,7 @@ class ImportOldQuestions extends Command
                 $subId = $subcategories['design']; // Database design
             }
 
-            // 6. Save/Insert into Question database
+            // 7. Save/Insert into Question database
             Question::create([
                 'primary_subcategory_id' => $subId,
                 'question_type' => $type,
