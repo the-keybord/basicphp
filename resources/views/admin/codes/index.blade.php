@@ -58,9 +58,26 @@
                                     @foreach($codes as $code)
                                         <tr class="hover:bg-gray-50/50 transition">
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <span class="font-mono font-black text-2xl tracking-wider text-blue-600 bg-blue-50/50 px-3 py-1.5 rounded-lg border border-blue-100 select-all">
-                                                    {{ $code->code }}
-                                                </span>
+                                                <div class="flex flex-col gap-1">
+                                                    <div class="relative flex items-center gap-1.5">
+                                                        <span class="font-mono font-black text-2xl tracking-wider text-blue-600 bg-blue-50/50 px-3 py-1.5 rounded-lg border border-blue-100 select-all">
+                                                            {{ $code->code }}
+                                                        </span>
+                                                        <button 
+                                                            onclick="navigator.clipboard.writeText('{{ url('code=' . $code->code) }}'); const el = this.nextElementSibling; el.classList.remove('opacity-0'); setTimeout(() => el.classList.add('opacity-0'), 2000)"
+                                                            class="inline-flex items-center p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg border border-transparent hover:border-blue-100 transition" 
+                                                            title="Copy Direct Link"
+                                                        >
+                                                            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+                                                            </svg>
+                                                        </button>
+                                                        <span class="absolute left-full ml-1 bg-gray-800 text-white text-xxs px-2 py-1 rounded opacity-0 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-50">
+                                                            Copied!
+                                                        </span>
+                                                    </div>
+                                                    <span class="text-[10px] font-semibold text-gray-400 select-all">{{ url('code=' . $code->code) }}</span>
+                                                </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-800">
                                                 @if(($code->type ?? 'testing') === 'resource')

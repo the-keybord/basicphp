@@ -14,9 +14,34 @@ use Illuminate\Support\Str;
 class PublicController extends Controller
 {
     // Show the landing page
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->has('code')) {
+            return $this->directJoin($request->query('code'));
+        }
         return view('welcome');
+    }
+
+    // Direct join with code via link
+    public function directJoin(string $code)
+    {
+        $code = strtoupper($code);
+        $codeModel = AccessCode::where('code', $code)->first();
+
+        if (!$codeModel || !$codeModel->isValid()) {
+            return redirect()->route('home')->withErrors(['access_code' => 'Invalid or expired code. Please try again.']);
+        }
+
+        if ($codeModel->type === 'resource') {
+            return redirect()->away($codeModel->resource_url);
+        }
+
+        $test = $codeModel->test;
+        if (!$test || !$test->is_active) {
+            return redirect()->route('home')->withErrors(['access_code' => 'This test is currently deactivated/hidden by the instructor.']);
+        }
+
+        return redirect()->route('test.join', ['code' => $code]);
     }
 
     // Process the 6-character code

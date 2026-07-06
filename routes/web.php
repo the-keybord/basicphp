@@ -11,6 +11,7 @@ use App\Http\Controllers\ImageProxyController;
 
 Route::get('/', [PublicController::class, 'index'])->name('home');
 Route::post('/access', [PublicController::class, 'accessCode'])->name('access.code');
+Route::get('/code={code}', [PublicController::class, 'directJoin'])->name('direct.join');
 
 Route::get('/test/join/{code}', [PublicController::class, 'joinTest'])->name('test.join');
 Route::post('/test/join/{code}', [PublicController::class, 'startTest'])->name('test.start');
