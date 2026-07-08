@@ -124,9 +124,11 @@
                             $parsed = $q['parsed'];
                             $studentAnswer = $session->answers[$qModel->id] ?? '';
                             $correctAnswer = $qModel->correct_answer_string ?? '';
-                            
+                             
                             $isCorrect = false;
-                            if (strtolower(trim($studentAnswer)) === strtolower(trim($correctAnswer)) && trim($correctAnswer) !== '') {
+                            $cleanedUser = html_entity_decode(strtolower(trim($studentAnswer)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                            $cleanedCorrect = html_entity_decode(strtolower(trim($correctAnswer)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                            if ($cleanedUser === $cleanedCorrect && trim($correctAnswer) !== '') {
                                 $isCorrect = true;
                             }
                             

@@ -96,13 +96,19 @@
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-100">
                                     @foreach($questions as $question)
+                                        @php
+                                            $textMatch = [];
+                                            preg_match('/<text>(.*?)<\/text>/s', $question->xml_content, $textMatch);
+                                            $questionText = isset($textMatch[1]) ? strip_tags(html_entity_decode($textMatch[1])) : '';
+                                        @endphp
                                         <tr class="question-row hover:bg-gray-50/50 transition"
                                             data-id="{{ $question->id }}"
                                             data-type="{{ $question->question_type }}"
                                             data-primary="{{ optional($question->primarySubcategory)->name ?? '' }}"
                                             data-secondary="{{ optional($question->secondarySubcategory)->name ?? '' }}"
                                             data-answer="{{ $question->correct_answer_string }}"
-                                            data-created="{{ $question->created_at->timestamp }}">
+                                            data-created="{{ $question->created_at->timestamp }}"
+                                            data-text="{{ $questionText }}">
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-700">
                                                 #{{ $question->id }}
                                             </td>
@@ -185,8 +191,10 @@
                     let visibleCount = 0;
 
                     rows.forEach(row => {
-                        // Concatenate text content to search universally across columns
-                        const text = row.textContent.toLowerCase();
+                        // Concatenate text content and question text to search universally across columns
+                        const textContent = row.textContent.toLowerCase();
+                        const questionText = (row.getAttribute('data-text') || '').toLowerCase();
+                        const text = textContent + ' ' + questionText;
                         if (text.includes(query)) {
                             row.style.display = '';
                             visibleCount++;

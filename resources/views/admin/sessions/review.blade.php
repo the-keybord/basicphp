@@ -83,12 +83,15 @@
                         $parsed = $q['parsed'];
                         $studentAnswer = $session->answers[$qModel->id] ?? '';
                         $correctAnswer = $qModel->correct_answer_string ?? '';
-                        
+                             
+                        $isEmpty = trim((string)$studentAnswer) === '';
                         $isCorrect = false;
-                        $isEmpty = empty(trim($studentAnswer));
-                        
-                        if (!$isEmpty && strtolower(trim($studentAnswer)) === strtolower(trim($correctAnswer)) && trim($correctAnswer) !== '') {
-                            $isCorrect = true;
+                             
+                        $cleanedUser = html_entity_decode(strtolower(trim($studentAnswer)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                        $cleanedCorrect = html_entity_decode(strtolower(trim($correctAnswer)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                             
+                        if (!$isEmpty && $cleanedUser === $cleanedCorrect && trim($correctAnswer) !== '') {
+                             $isCorrect = true;
                         }
                         
                         $cardBorder = $isEmpty ? 'border-gray-200' : ($isCorrect ? 'border-green-300' : 'border-red-300');
@@ -105,6 +108,16 @@
                                 <span class="text-xxs text-gray-400 font-semibold px-2 py-0.5 bg-gray-100 rounded border border-gray-200 uppercase">
                                     {{ str_replace('_', ' ', $qModel->question_type) }}
                                 </span>
+                                <span class="text-xxs text-gray-400 font-semibold px-2 py-0.5 bg-gray-100 rounded border border-gray-200 uppercase">
+                                    ID: {{ $qModel->id }}
+                                </span>
+                                <a href="{{ route('admin.questions.preview', $qModel) }}" target="_blank" class="inline-flex items-center px-2 py-0.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded text-xxs font-semibold transition" title="Preview Question">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                    Preview
+                                </a>
                             </div>
                             <span class="px-3 py-1 border rounded-full text-xxs font-black uppercase tracking-wider {{ $statusBg }}">
                                 @if($isEmpty)

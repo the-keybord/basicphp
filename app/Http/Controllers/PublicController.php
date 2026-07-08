@@ -209,6 +209,9 @@ class PublicController extends Controller
             return redirect()->route('test.session', ['token' => $token]);
         }
 
+        // Dynamically recalculate/update score when loading results
+        $session->recalculateScore();
+
         $rules = $session->accessCode->rules ?? [];
         $hideDetails = !empty($rules['hide_after_submit']);
         $viewAnswers = !empty($rules['view_answers_after_submit']);
@@ -260,9 +263,9 @@ class PublicController extends Controller
 
             $finalAnswers[$qId] = $formattedValue;
 
-            // Compare case-insensitively and trim spaces
-            $cleanedUser = strtolower(trim($formattedValue));
-            $cleanedCorrect = strtolower(trim($question->correct_answer_string ?? ''));
+            // Compare case-insensitively, decode HTML entities, and trim spaces
+            $cleanedUser = html_entity_decode(strtolower(trim($formattedValue)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $cleanedCorrect = html_entity_decode(strtolower(trim($question->correct_answer_string ?? '')), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
             if ($cleanedUser === $cleanedCorrect && $cleanedCorrect !== '') {
                 $score++;

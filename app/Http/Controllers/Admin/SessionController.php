@@ -22,25 +22,9 @@ class SessionController extends Controller
         }
 
         // Grade the session with whatever answers they currently have auto-saved
-        $score = 0;
-        $questions = Question::whereIn('id', $session->questions_order)->get()->keyBy('id');
-        $answers = $session->answers ?? [];
-
-        foreach ($session->questions_order as $qId) {
-            $question = $questions->get($qId);
-            if (!$question) continue;
-
-            $userVal = $answers[$qId] ?? '';
-            $cleanedUser = strtolower(trim((string)$userVal));
-            $cleanedCorrect = strtolower(trim((string)$question->correct_answer_string));
-
-            if ($cleanedUser === $cleanedCorrect && $cleanedCorrect !== '') {
-                $score++;
-            }
-        }
+        $session->recalculateScore();
 
         $session->update([
-            'score' => $score,
             'is_interrupted' => true,
             'completed_at' => now(),
         ]);
@@ -51,6 +35,9 @@ class SessionController extends Controller
     public function review(TestSession $session)
     {
         $session->load(['accessCode.test']);
+
+        // Dynamically recalculate/update score when reviewing the session
+        $session->recalculateScore();
 
         // Fetch questions in display order
         $questionsMap = Question::whereIn('id', $session->questions_order)->get()->keyBy('id');

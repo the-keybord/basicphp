@@ -20,6 +20,26 @@
         </div>
     </x-slot>
 
+    <style>
+        .whitespace-pre-wrap,
+        .whitespace-pre-wrap p,
+        .whitespace-pre-wrap pre,
+        .whitespace-pre-wrap code {
+            margin: 0 !important;
+            padding: 0 !important;
+            line-height: 1.25 !important;
+        }
+        .dnd-tile.dnd-placed {
+            padding: 2px 6px !important;
+            font-size: 0.75rem !important;
+            line-height: 1.25 !important;
+            border-radius: 6px !important;
+            border-width: 1px !important;
+            margin: 0 2px !important;
+            display: inline-block !important;
+        }
+    </style>
+
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -83,16 +103,56 @@
                                 </div>
 
                                 <div class="flex items-center space-x-2">
+                                    <span class="text-xxs text-gray-400 font-semibold px-2 py-0.5 bg-gray-100 rounded border border-gray-200 uppercase">
+                                        ID: {{ $qModel->id }}
+                                    </span>
                                     <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold border capitalize {{ $color }}">
                                         {{ $formattedType }}
                                     </span>
+                                    <a href="{{ route('admin.questions.preview', $qModel) }}" target="_blank" class="inline-flex items-center px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-semibold transition" title="Preview Question">
+                                        <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                        Preview
+                                    </a>
+                                    <a href="{{ route('admin.questions.edit', $qModel) }}" target="_blank" class="inline-flex items-center px-2 py-1 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 border border-yellow-200 rounded-lg text-xs font-semibold transition" title="Edit Question">
+                                        <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                        Edit
+                                    </a>
                                 </div>
                             </div>
 
                             <!-- Question Content -->
                             <div class="p-8 space-y-6">
+                                @php
+                                    $questionText = $parsed['text'];
+                                    $hasInlineDropdowns = false;
+                                    if ($qModel->question_type === 'dropdown' && !empty($parsed['subjects']) && str_contains($questionText, '__')) {
+                                        $hasInlineDropdowns = true;
+                                        $sIdx = 0;
+                                        $questionText = preg_replace_callback('/__/', function($match) use ($qModel, $parsed, &$sIdx) {
+                                            $subOptions = $parsed['subjects'][$sIdx] ?? [];
+                                            $sIdx++;
+                                            
+                                            $optionsHtml = '<option value="" disabled selected>Choose...</option>';
+                                            foreach ($subOptions as $option) {
+                                                $optionsHtml .= '<option value="' . htmlspecialchars(strip_tags($option)) . '">' . strip_tags($option) . '</option>';
+                                            }
+                                            
+                                            return '<select class="inline-block border-gray-300 rounded-lg py-1.5 px-3 mx-1 text-sm text-gray-700 font-medium bg-white focus:ring-blue-500 shadow-sm align-middle max-w-[200px]">' . $optionsHtml . '</select>';
+                                        }, $questionText);
+                                    }
+                                @endphp
+
                                 <!-- Text -->
-                                <pre class="text-lg font-medium text-gray-800 leading-relaxed" style="font-family:inherit;white-space:pre-wrap;margin:0;padding:0;background:transparent;border:none;overflow:visible;"@if($qModel->question_type === 'drag_and_drop') id="dnd-text-{{ $index }}" @endif>{!! $parsed['text'] !!}</pre>
+                                @if($hasInlineDropdowns)
+                                    <div class="text-lg font-medium text-gray-800 leading-relaxed whitespace-pre-wrap">{!! $questionText !!}</div>
+                                @else
+                                    <pre class="text-lg font-medium text-gray-800 leading-relaxed" style="font-family:inherit;white-space:pre-wrap;margin:0;padding:0;background:transparent;border:none;overflow:visible;"@if($qModel->question_type === 'drag_and_drop') id="dnd-text-{{ $index }}" @endif>{!! $parsed['text'] !!}</pre>
+                                @endif
 
                                 <!-- Image Diagram -->
                                 @if(!empty($parsed['image']))
@@ -110,9 +170,9 @@
                                     @if($qModel->question_type === 'singleselect')
                                         <div class="space-y-2.5">
                                             @foreach($parsed['options'] as $oIdx => $option)
-                                                <label class="flex items-center p-3.5 border border-gray-200 hover:border-blue-400 rounded-xl hover:bg-blue-50/10 cursor-pointer transition">
-                                                    <input type="radio" name="choice_{{ $index }}" value="{{ $oIdx }}" class="w-4 h-4 text-blue-600 border-gray-300">
-                                                    <span class="ml-3 text-gray-700 font-medium">{!! $option !!}</span>
+                                                <label class="flex items-start p-3.5 border border-gray-200 hover:border-blue-400 rounded-xl hover:bg-blue-50/10 cursor-pointer transition">
+                                                    <input type="radio" name="choice_{{ $index }}" value="{{ $oIdx }}" class="w-4 h-4 text-blue-600 border-gray-300 mt-1">
+                                                    <span class="ml-3 text-gray-700 font-medium whitespace-pre-wrap leading-snug [&_p]:m-0 [&_pre]:m-0 [&_code]:m-0 [&_ul]:m-0 [&_ol]:m-0">{!! $option !!}</span>
                                                 </label>
                                             @endforeach
                                         </div>
@@ -121,38 +181,40 @@
                                     @elseif($qModel->question_type === 'multiselect')
                                         <div class="space-y-2.5">
                                             @foreach($parsed['options'] as $oIdx => $option)
-                                                <label class="flex items-center p-3.5 border border-gray-200 hover:border-purple-400 rounded-xl hover:bg-purple-50/10 cursor-pointer transition">
-                                                    <input type="checkbox" name="choices_{{ $index }}[]" value="{{ $oIdx }}" class="w-4 h-4 text-purple-600 border-gray-300 rounded">
-                                                    <span class="ml-3 text-gray-700 font-medium">{!! $option !!}</span>
+                                                <label class="flex items-start p-3.5 border border-gray-200 hover:border-purple-400 rounded-xl hover:bg-purple-50/10 cursor-pointer transition">
+                                                    <input type="checkbox" name="choices_{{ $index }}[]" value="{{ $oIdx }}" class="w-4 h-4 text-purple-600 border-gray-300 rounded mt-1">
+                                                    <span class="ml-3 text-gray-700 font-medium whitespace-pre-wrap leading-snug [&_p]:m-0 [&_pre]:m-0 [&_code]:m-0 [&_ul]:m-0 [&_ol]:m-0">{!! $option !!}</span>
                                                 </label>
                                             @endforeach
                                         </div>
 
                                     <!-- Dropdown choices -->
                                     @elseif($qModel->question_type === 'dropdown')
-                                        @if(!empty($parsed['subjects']))
-                                            <div class="space-y-4">
-                                                @foreach($parsed['subjects'] as $sIdx => $subOptions)
-                                                    <div class="max-w-md">
-                                                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Dropdown #{{ $sIdx + 1 }}</label>
-                                                        <select class="block w-full border-gray-300 rounded-xl p-3 text-sm text-gray-700 font-medium bg-white">
-                                                            <option disabled selected>Choose answer...</option>
-                                                            @foreach($subOptions as $opt)
-                                                                <option>{!! strip_tags($opt) !!}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        @else
-                                            <div class="max-w-md">
-                                                <select class="block w-full border-gray-300 rounded-xl p-3 text-sm text-gray-700 font-medium bg-white">
-                                                    <option disabled selected>Choose answer...</option>
-                                                    @foreach($parsed['options'] as $opt)
-                                                        <option>{!! strip_tags($opt) !!}</option>
+                                        @if(!$hasInlineDropdowns)
+                                            @if(!empty($parsed['subjects']))
+                                                <div class="space-y-4">
+                                                    @foreach($parsed['subjects'] as $sIdx => $subOptions)
+                                                        <div class="max-w-md">
+                                                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Dropdown #{{ $sIdx + 1 }}</label>
+                                                            <select class="block w-full border-gray-300 rounded-xl p-3 text-sm text-gray-700 font-medium bg-white">
+                                                                <option disabled selected>Choose answer...</option>
+                                                                @foreach($subOptions as $opt)
+                                                                    <option>{!! strip_tags($opt) !!}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
                                                     @endforeach
-                                                </select>
-                                            </div>
+                                                </div>
+                                            @else
+                                                <div class="max-w-md">
+                                                    <select class="block w-full border-gray-300 rounded-xl p-3 text-sm text-gray-700 font-medium bg-white">
+                                                        <option disabled selected>Choose answer...</option>
+                                                        @foreach($parsed['options'] as $opt)
+                                                            <option>{!! strip_tags($opt) !!}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            @endif
                                         @endif
 
                                     <!-- True/False choices -->
@@ -404,6 +466,7 @@
                     globalDragging.draggable     = false;
                     globalDragging.title         = 'Click to return';
                     globalDragging.onclick       = () => sendToPool(globalDragging, slot, true);
+                    globalDragging.classList.add('dnd-placed');
 
                     slot.innerHTML         = '';
                     slot.style.minWidth    = 'auto';
@@ -424,6 +487,7 @@
                 tile.style.opacity = '1';
                 tile.title        = '';
                 tile.onclick      = null;
+                tile.classList.remove('dnd-placed');
                 setupTile(tile);
                 pool.appendChild(tile);
                 if (clearSlot) {
