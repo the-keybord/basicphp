@@ -50,7 +50,6 @@
                                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Target Test / Link</th>
                                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Expires At</th>
-                                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Rules / Modifiers</th>
                                         <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
@@ -112,27 +111,6 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {{ $code->expires_at ? $code->expires_at->format('M d, Y h:i A') : 'Never' }}
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500">
-                                                <div class="flex flex-wrap gap-1">
-                                                    @foreach($code->rules as $rule => $active)
-                                                        @if($active)
-                                                            @php
-                                                                $ruleNames = [
-                                                                    'mix_questions' => 'Shuffle Questions',
-                                                                    'mix_options' => 'Shuffle Options',
-                                                                    'hide_after_submit' => 'Hide Test Post-Submit',
-                                                                    'view_answers_after_submit' => 'View Answers Post-Submit',
-                                                                    'view_correct_answers' => 'Show Key Post-Submit',
-                                                                ];
-                                                                $label = $ruleNames[$rule] ?? $rule;
-                                                            @endphp
-                                                            <span class="px-2 py-0.5 bg-gray-100 border border-gray-200 text-gray-600 rounded text-xxs font-semibold">
-                                                                {{ $label }}
-                                                            </span>
-                                                        @endif
-                                                    @endforeach
-                                                </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                 <form action="{{ route('admin.codes.destroy', $code) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this access code? Students will no longer be able to use it to join.');">
