@@ -136,6 +136,15 @@
                                     <span class="block text-xs text-gray-500">Show the correct answer keys in green alongside the student's choices on their review sheet.</span>
                                 </div>
                             </label>
+
+                            <!-- View Grade -->
+                            <label class="flex items-start cursor-pointer select-none border-t border-gray-100 pt-3">
+                                <input type="checkbox" name="rules[view_grade]" value="1" {{ old('rules.view_grade', '1') ? 'checked' : '' }} class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 rounded mt-0.5">
+                                <div class="ml-3">
+                                    <span class="block text-sm font-semibold text-gray-800">Show Grade Post-Submit</span>
+                                    <span class="block text-xs text-gray-500">Allow students to see their score and grade percentage after completing the test.</span>
+                                </div>
+                            </label>
                         </div>
                     </div>
 

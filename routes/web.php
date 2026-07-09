@@ -3,6 +3,8 @@ use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\TestController;
 use App\Http\Controllers\Admin\AccessCodeController;
 use App\Http\Controllers\Admin\SessionController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\SubcategoryController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -45,6 +47,9 @@ Route::middleware('auth')->group(function () {
             ->name('tests.toggle');
 
         Route::resource('codes', AccessCodeController::class);
+
+        Route::resource('categories', CategoryController::class);
+        Route::resource('subcategories', SubcategoryController::class);
 
         Route::get('sessions', [SessionController::class, 'index'])->name('sessions.index');
         Route::get('sessions/{session}/review', [SessionController::class, 'review'])->name('sessions.review');

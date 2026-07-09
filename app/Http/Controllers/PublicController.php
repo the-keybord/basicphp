@@ -216,6 +216,7 @@ class PublicController extends Controller
         $hideDetails = !empty($rules['hide_after_submit']);
         $viewAnswers = !empty($rules['view_answers_after_submit']);
         $viewCorrect = !empty($rules['view_correct_answers']);
+        $viewGrade = isset($rules['view_grade']) ? !empty($rules['view_grade']) : true;
 
         // Fetch questions in display order
         $questionsMap = Question::whereIn('id', $session->questions_order)->get()->keyBy('id');
@@ -235,7 +236,7 @@ class PublicController extends Controller
             ];
         });
 
-        return view('welcome.results', compact('session', 'hideDetails', 'viewAnswers', 'viewCorrect', 'renderedQuestions'));
+        return view('welcome.results', compact('session', 'hideDetails', 'viewAnswers', 'viewCorrect', 'viewGrade', 'renderedQuestions'));
     }
 
     // Core grading routine

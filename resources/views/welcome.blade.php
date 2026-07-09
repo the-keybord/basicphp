@@ -28,7 +28,7 @@
         }
     </style>
 </head>
-<body class="bg-black text-white antialiased selection:bg-purple-650 selection:text-white">
+<body class="bg-slate-50 dark:bg-black text-slate-800 dark:text-white antialiased selection:bg-purple-650 selection:text-white transition-colors duration-300">
 
     <!-- FLOATING NAVBAR -->
     <x-navbar logoUrl="#section1" maxWidth="max-w-6xl">
@@ -327,7 +327,7 @@
     </section>
 
     <!-- FOOTER -->
-    <footer class="bg-black py-8 border-t border-neutral-900 text-center text-xs text-neutral-500">
+    <footer class="bg-slate-100 dark:bg-black py-8 border-t border-slate-200 dark:border-neutral-900 text-center text-xs text-slate-500 dark:text-neutral-500 transition-colors duration-300">
         <div class="max-w-6xl mx-auto px-4 space-y-2">
             <p>&copy; {{ date('Y') }} ZeceInfo. Toate drepturile rezervate.</p>
             <p class="text-[10px] text-neutral-700">Construit cu dedicare pentru performanță academică.</p>

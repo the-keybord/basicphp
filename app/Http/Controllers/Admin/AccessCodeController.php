@@ -45,6 +45,7 @@ class AccessCodeController extends Controller
                 'hide_after_submit' => $request->has('rules.hide_after_submit'),
                 'view_answers_after_submit' => $request->has('rules.view_answers_after_submit'),
                 'view_correct_answers' => $request->has('rules.view_correct_answers'),
+                'view_grade' => $request->has('rules.view_grade'),
             ];
         }
 

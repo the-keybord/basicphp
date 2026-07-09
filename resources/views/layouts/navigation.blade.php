@@ -90,6 +90,10 @@
                         {{ __('Questions') }}
                     </x-nav-link>
 
+                    <x-nav-link :href="route('admin.categories.index')" :active="request()->routeIs('admin.categories.*') || request()->routeIs('admin.subcategories.*')">
+                        {{ __('Categories') }}
+                    </x-nav-link>
+
                     <x-nav-link :href="route('admin.tests.index')" :active="request()->routeIs('admin.tests.*')">
                         {{ __('Tests') }}
                     </x-nav-link>
@@ -168,6 +172,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('admin.questions.index')" :active="request()->routeIs('admin.questions.*')">
                 {{ __('Questions') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.categories.index')" :active="request()->routeIs('admin.categories.*') || request()->routeIs('admin.subcategories.*')">
+                {{ __('Categories') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('admin.tests.index')" :active="request()->routeIs('admin.tests.*')">
                 {{ __('Tests') }}

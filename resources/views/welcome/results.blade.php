@@ -83,22 +83,36 @@
                 Student: <span class="text-gray-800 font-bold">{{ $session->firstname }} {{ $session->lastname }}</span>
             </p>
 
-            <div class="py-6 max-w-xs mx-auto">
-                @php
-                    $percentage = $session->total_questions > 0 ? round(($session->score / $session->total_questions) * 100) : 0;
-                    $scoreColor = $percentage >= 70 ? 'text-green-600' : ($percentage >= 50 ? 'text-yellow-600' : 'text-red-600');
-                    $bgColor = $percentage >= 70 ? 'bg-green-50' : ($percentage >= 50 ? 'bg-yellow-50' : 'bg-red-50');
-                @endphp
-                <div class="rounded-2xl {{ $bgColor }} p-6 border border-gray-100">
-                    <span class="text-xxs font-bold text-gray-400 uppercase tracking-widest block mb-1">Your Score</span>
-                    <div class="text-5xl font-black {{ $scoreColor }}">
-                        {{ $session->score }} <span class="text-2xl text-gray-400">/ {{ $session->total_questions }}</span>
-                    </div>
-                    <div class="text-sm font-bold text-gray-500 mt-1">
-                        Grade: {{ $percentage }}%
+            @if($viewGrade)
+                <div class="py-6 max-w-xs mx-auto">
+                    @php
+                        $percentage = $session->total_questions > 0 ? round(($session->score / $session->total_questions) * 100) : 0;
+                        $scoreColor = $percentage >= 70 ? 'text-green-600' : ($percentage >= 50 ? 'text-yellow-600' : 'text-red-600');
+                        $bgColor = $percentage >= 70 ? 'bg-green-50' : ($percentage >= 50 ? 'bg-yellow-50' : 'bg-red-50');
+                    @endphp
+                    <div class="rounded-2xl {{ $bgColor }} p-6 border border-gray-100">
+                        <span class="text-xxs font-bold text-gray-400 uppercase tracking-widest block mb-1">Your Score</span>
+                        <div class="text-5xl font-black {{ $scoreColor }}">
+                            {{ $session->score }} <span class="text-2xl text-gray-400">/ {{ $session->total_questions }}</span>
+                        </div>
+                        <div class="text-sm font-bold text-gray-500 mt-1">
+                            Grade: {{ $percentage }}%
+                        </div>
                     </div>
                 </div>
-            </div>
+            @else
+                <div class="py-6 max-w-md mx-auto">
+                    <div class="rounded-2xl bg-blue-50/50 p-6 border border-blue-100 text-blue-800 dark:text-blue-300">
+                        <span class="text-xxs font-bold text-blue-400 uppercase tracking-widest block mb-1">Results Status</span>
+                        <div class="text-lg font-bold">
+                            Graded successfully
+                        </div>
+                        <div class="text-xs text-blue-600 dark:text-blue-450 mt-1">
+                            Your score and grade are hidden per the test configuration.
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
 
         @if($hideDetails)
