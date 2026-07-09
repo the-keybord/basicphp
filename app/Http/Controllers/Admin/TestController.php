@@ -41,14 +41,22 @@ class TestController extends Controller
         foreach ($request->questions as $subId => $count) {
             $count = intval($count);
             if ($count > 0) {
-                // Fetch random questions for this subcategory
-                $ids = Question::where('primary_subcategory_id', $subId)
-                    ->inRandomOrder()
+                // Fetch random questions matching either primary or secondary subcategory
+                $query = Question::where(function ($q) use ($subId) {
+                    $q->where('primary_subcategory_id', $subId)
+                      ->orWhere('secondary_subcategory_id', $subId);
+                });
+
+                if (!empty($questionIds)) {
+                    $query->whereNotIn('id', $questionIds);
+                }
+
+                $ids = $query->inRandomOrder()
                     ->take($count)
                     ->pluck('id')
                     ->toArray();
 
-                $questionIds = array_merge($questionIds, $ids);
+                $questionIds = array_unique(array_merge($questionIds, $ids));
             }
         }
 

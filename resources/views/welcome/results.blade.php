@@ -182,7 +182,7 @@
                                     <div>
                                         <span class="text-xxs font-bold text-gray-400 uppercase tracking-widest block mb-1">Your Answer</span>
                                         <div class="px-4 py-3 rounded-lg border font-medium text-sm {{ $isCorrect ? 'bg-green-50/50 border-green-200 text-green-900' : 'bg-red-50/50 border-red-200 text-red-900' }}">
-                                            {{ $studentAnswer ?: '(No answer selected)' }}
+                                            {{ str_replace('#', ', ', $studentAnswer) ?: '(No answer selected)' }}
                                         </div>
                                     </div>
 
@@ -191,7 +191,7 @@
                                         <div>
                                             <span class="text-xxs font-bold text-gray-400 uppercase tracking-widest block mb-1">Correct Answer</span>
                                             <div class="px-4 py-3 bg-green-50 border border-green-200 text-green-900 rounded-lg font-bold text-sm">
-                                                {{ $correctAnswer }}
+                                                {{ str_replace('#', ', ', $correctAnswer) }}
                                             </div>
                                         </div>
                                     @endif

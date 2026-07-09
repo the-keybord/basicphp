@@ -1,180 +1,205 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-bold text-2xl text-gray-800 leading-tight">
-                {{ __('Question Bank') }}
-            </h2>
-            <div class="flex items-center space-x-2">
-                @if($questions->isNotEmpty())
-                    <a href="{{ route('admin.questions.preview', $questions->first()->id, false) }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-lg shadow transition duration-150 ease-in-out">
-                        <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                        </svg>
-                        Start Slideshow Review
-                    </a>
-                @endif
-                <a href="{{ route('admin.questions.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition duration-150 ease-in-out">
-                    <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    Add New Question
-                </a>
+    <div class="py-12 max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <!-- Alert Banner -->
+        @if(session('success'))
+            <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg shadow-sm flex items-center">
+                <svg class="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="text-green-800 font-medium">{{ session('success') }}</span>
             </div>
-        </div>
-    </x-slot>
+        @endif
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Alert Banner -->
-            @if(session('success'))
-                <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg shadow-sm flex items-center">
-                    <svg class="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <span class="text-green-800 font-medium">{{ session('success') }}</span>
-                </div>
-            @endif
-
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-100">
-                <div class="p-6 text-gray-900">
-                    @if($questions->isEmpty())
-                        <div class="text-center py-12">
-                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+        <div class="flex flex-col md:flex-row gap-6 items-start">
+            
+            <!-- Left Sidebar -->
+            <aside class="w-full md:w-80 md:sticky md:top-6 space-y-6 flex-shrink-0">
+                <!-- Title & Add Question Card -->
+                <div class="bg-white rounded-2xl border border-gray-150 p-5 shadow-sm space-y-4">
+                    <h2 class="font-bold text-lg text-gray-800 leading-tight border-b border-gray-100 pb-3">
+                        Question Bank
+                    </h2>
+                    
+                    <div class="flex flex-col gap-2">
+                        <a href="{{ route('admin.questions.create') }}" class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase rounded-lg shadow-sm transition gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             </svg>
-                            <h3 class="mt-2 text-sm font-semibold text-gray-900">No questions found</h3>
-                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new XML-based question.</p>
-                            <div class="mt-6">
-                                <a href="{{ route('admin.questions.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow">
-                                    Create first question
-                                </a>
-                            </div>
-                        </div>
-                    @else
-                        <!-- Search and Metadata Control Bar -->
-                        <div class="mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
-                            <div class="relative w-full md:max-w-md">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                    </svg>
-                                </span>
-                                <input type="text" id="search-input" placeholder="Search by ID, type, subcategory, or correct answer..." class="block w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm transition">
-                            </div>
-                            <div class="text-xs font-bold text-gray-450 uppercase tracking-widest bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-150" id="search-results-count">
-                                Showing {{ count($questions) }} questions
-                            </div>
-                        </div>
+                            Add New Question
+                        </a>
+                        
+                        @if($questions->isNotEmpty())
+                            <a href="{{ route('admin.questions.preview', $questions->first()->id, false) }}" class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold uppercase rounded-lg shadow-sm transition gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                Slideshow Review
+                            </a>
+                        @endif
+                    </div>
+                </div>
 
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="id">
-                                            ID <span class="sort-icon ml-1 text-gray-400">⇅</span>
-                                        </th>
-                                        <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="type">
-                                            Type <span class="sort-icon ml-1 text-gray-400">⇅</span>
-                                        </th>
-                                        <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="primary">
-                                            Primary Subcategory <span class="sort-icon ml-1 text-gray-400">⇅</span>
-                                        </th>
-                                        <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="secondary">
-                                            Secondary Subcategory <span class="sort-icon ml-1 text-gray-400">⇅</span>
-                                        </th>
-                                        <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="answer">
-                                            Correct Answer <span class="sort-icon ml-1 text-gray-400">⇅</span>
-                                        </th>
-                                        <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="created">
-                                            Created <span class="sort-icon ml-1 text-gray-400">⇅</span>
-                                        </th>
-                                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-100">
-                                    @foreach($questions as $question)
-                                        @php
-                                            $textMatch = [];
-                                            preg_match('/<text>(.*?)<\/text>/s', $question->xml_content, $textMatch);
-                                            $questionText = isset($textMatch[1]) ? strip_tags(html_entity_decode($textMatch[1])) : '';
-                                        @endphp
-                                        <tr class="question-row hover:bg-gray-50/50 transition"
-                                            data-id="{{ $question->id }}"
-                                            data-type="{{ $question->question_type }}"
-                                            data-primary="{{ optional($question->primarySubcategory)->name ?? '' }}"
-                                            data-secondary="{{ optional($question->secondarySubcategory)->name ?? '' }}"
-                                            data-answer="{{ $question->correct_answer_string }}"
-                                            data-created="{{ $question->created_at->timestamp }}"
-                                            data-text="{{ $questionText }}">
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-700">
-                                                #{{ $question->id }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                @php
-                                                    $badgeColors = [
-                                                        'multiselect' => 'bg-purple-50 text-purple-700 border-purple-100',
-                                                        'singleselect' => 'bg-indigo-50 text-indigo-700 border-indigo-100',
-                                                        'dropdown' => 'bg-blue-50 text-blue-700 border-blue-100',
-                                                        'drag_and_drop' => 'bg-amber-50 text-amber-700 border-amber-100',
-                                                        'truefalse' => 'bg-teal-50 text-teal-700 border-teal-100',
-                                                    ];
-                                                    $color = $badgeColors[$question->question_type] ?? 'bg-gray-50 text-gray-700 border-gray-100';
-                                                    $formattedType = str_replace('_', ' ', $question->question_type);
-                                                @endphp
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border {{ $color }} capitalize">
-                                                    {{ $formattedType }}
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                                @if($question->primarySubcategory)
-                                                    <span class="text-xs text-gray-400 block font-medium uppercase tracking-wider">{{ $question->primarySubcategory->category->name }}</span>
-                                                    <span class="font-medium text-gray-900">{{ $question->primarySubcategory->name }}</span>
-                                                @else
-                                                    <span class="text-gray-400">—</span>
-                                                @endif
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                                @if($question->secondarySubcategory)
-                                                    <span class="text-xs text-gray-400 block font-medium uppercase tracking-wider">{{ $question->secondarySubcategory->category->name }}</span>
-                                                    <span class="font-medium text-gray-900">{{ $question->secondarySubcategory->name }}</span>
-                                                @else
-                                                    <span class="text-gray-400 italic">None</span>
-                                                @endif
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                                                {{ Str::limit($question->correct_answer_string, 20) ?: 'N/A' }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $question->created_at->format('M d, Y') }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                                <a href="{{ route('admin.questions.preview', $question) }}" class="inline-flex items-center text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition" title="Preview Question">
-                                                    Preview
+                <!-- Search & Filters Card -->
+                <div class="bg-white rounded-2xl border border-gray-150 p-5 shadow-sm space-y-4">
+                    <span class="text-xs font-bold text-gray-450 uppercase tracking-widest block border-b border-gray-100 pb-2">Filter Search</span>
+                    <div class="space-y-1.5">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Query</label>
+                        <div class="relative w-full">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </span>
+                            <input type="text" id="search-input" placeholder="Search questions..." class="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 text-xs transition bg-white">
+                        </div>
+                    </div>
+                    
+                    <div class="pt-2 border-t border-gray-100 flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</span>
+                        <div class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md border border-blue-100" id="search-results-count">
+                            Showing {{ count($questions) }} questions
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Right Main Column (Table area) -->
+            <main class="flex-grow w-full min-w-0 bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-100 p-6 text-gray-900">
+                @if($questions->isEmpty())
+                    <div class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-semibold text-gray-900">No questions found</h3>
+                        <p class="mt-1 text-sm text-gray-500">Get started by creating a new XML-based question.</p>
+                        <div class="mt-6">
+                            <a href="{{ route('admin.questions.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow">
+                                Create first question
+                            </a>
+                        </div>
+                    </div>
+                @else
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="id">
+                                        ID <span class="sort-icon ml-1 text-gray-400">⇅</span>
+                                    </th>
+                                    <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="type">
+                                        Type <span class="sort-icon ml-1 text-gray-400">⇅</span>
+                                    </th>
+                                    <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="primary">
+                                        Primary Subcategory <span class="sort-icon ml-1 text-gray-400">⇅</span>
+                                    </th>
+                                    <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="secondary">
+                                        Secondary Subcategory <span class="sort-icon ml-1 text-gray-400">⇅</span>
+                                    </th>
+                                    <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="answer">
+                                        Correct Answer <span class="sort-icon ml-1 text-gray-400">⇅</span>
+                                    </th>
+                                    <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="created">
+                                        Created <span class="sort-icon ml-1 text-gray-400">⇅</span>
+                                    </th>
+                                    <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-100">
+                                @foreach($questions as $question)
+                                    @php
+                                        $textMatch = [];
+                                        preg_match('/<text>(.*?)<\/text>/s', $question->xml_content, $textMatch);
+                                        $questionText = isset($textMatch[1]) ? strip_tags(html_entity_decode($textMatch[1])) : '';
+                                    @endphp
+                                    <tr class="question-row hover:bg-gray-50/50 transition"
+                                        data-id="{{ $question->id }}"
+                                        data-type="{{ $question->question_type }}"
+                                        data-primary="{{ optional($question->primarySubcategory)->name ?? '' }}"
+                                        data-secondary="{{ optional($question->secondarySubcategory)->name ?? '' }}"
+                                        data-answer="{{ $question->correct_answer_string }}"
+                                        data-created="{{ $question->created_at->timestamp }}"
+                                        data-text="{{ $questionText }}">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-700">
+                                            #{{ $question->id }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @php
+                                                $badgeColors = [
+                                                    'multiselect' => 'bg-purple-50 text-purple-700 border-purple-100',
+                                                    'singleselect' => 'bg-indigo-50 text-indigo-700 border-indigo-100',
+                                                    'dropdown' => 'bg-blue-50 text-blue-700 border-blue-100',
+                                                    'drag_and_drop' => 'bg-amber-50 text-amber-700 border-amber-100',
+                                                    'truefalse' => 'bg-teal-50 text-teal-700 border-teal-100',
+                                                ];
+                                                $color = $badgeColors[$question->question_type] ?? 'bg-gray-50 text-gray-700 border-gray-100';
+                                                $formattedType = str_replace('_', ' ', $question->question_type);
+                                            @endphp
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border {{ $color }} capitalize">
+                                                {{ $formattedType }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                            @if($question->primarySubcategory)
+                                                <span class="text-xs text-gray-400 block font-medium uppercase tracking-wider">{{ $question->primarySubcategory->category->name }}</span>
+                                                <span class="font-medium text-gray-900">{{ $question->primarySubcategory->name }}</span>
+                                            @else
+                                                <span class="text-gray-400">—</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                            @if($question->secondarySubcategory)
+                                                <span class="text-xs text-gray-400 block font-medium uppercase tracking-wider">{{ $question->secondarySubcategory->category->name }}</span>
+                                                <span class="font-medium text-gray-900">{{ $question->secondarySubcategory->name }}</span>
+                                            @else
+                                                <span class="text-gray-400 italic">None</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                                            {{ Str::limit($question->correct_answer_string, 20) ?: 'N/A' }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ $question->created_at->format('M d, Y') }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <div class="flex items-center justify-end space-x-1.5">
+                                                <!-- Preview -->
+                                                <a href="{{ route('admin.questions.preview', $question) }}" class="inline-flex items-center p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg border border-transparent hover:border-blue-100 transition" title="Preview Question">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                    </svg>
                                                 </a>
-                                                <a href="{{ route('admin.questions.edit', $question) }}" class="inline-flex items-center text-amber-600 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition" title="Edit">
-                                                    Edit
+                                                <!-- Edit -->
+                                                <a href="{{ route('admin.questions.edit', $question) }}" class="inline-flex items-center p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg border border-transparent hover:border-amber-100 transition" title="Edit Question">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                    </svg>
                                                 </a>
+                                                <!-- Delete -->
                                                 <form action="{{ route('admin.questions.destroy', $question) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this question?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="inline-flex items-center text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition" title="Delete">
-                                                        Delete
+                                                    <button type="submit" class="inline-flex items-center p-1.5 text-red-600 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-100 transition" title="Delete Question">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                        </svg>
                                                     </button>
                                                 </form>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @endif
-                </div>
-            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </main>
         </div>
     </div>
+
 
     <!-- Client-side Sorting & Filtering Logic -->
     <script>

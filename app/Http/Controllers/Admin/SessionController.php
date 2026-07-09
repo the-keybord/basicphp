@@ -9,9 +9,18 @@ use Illuminate\Http\Request;
 
 class SessionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $sessions = TestSession::with(['accessCode.test'])->latest()->get();
+        $query = TestSession::with(['accessCode.test']);
+
+        if ($request->filled('code')) {
+            $code = strtoupper(trim($request->code));
+            $query->whereHas('accessCode', function($q) use ($code) {
+                $q->where('code', 'like', "%{$code}%");
+            });
+        }
+
+        $sessions = $query->latest()->get();
         return view('admin.sessions.index', compact('sessions'));
     }
 

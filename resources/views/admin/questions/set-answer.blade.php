@@ -100,7 +100,7 @@
                                         $optionsHtml .= '<option value="' . htmlspecialchars(strip_tags($option)) . '">' . strip_tags($option) . '</option>';
                                     }
                                     
-                                    return '<select class="inline-block border-gray-300 rounded-lg py-1.5 px-3 mx-1 text-sm text-gray-700 font-medium bg-white focus:ring-blue-500 shadow-sm align-middle max-w-[200px]">' . $optionsHtml . '</select>';
+                                    return '<select class="inline-block border-gray-300 rounded-lg py-1.5 pl-3 pr-8 mx-1 text-sm text-gray-700 font-medium bg-white focus:ring-blue-500 shadow-sm align-middle w-auto max-w-full">' . $optionsHtml . '</select>';
                                 }, $questionText);
                             }
                         @endphp

@@ -1,30 +1,48 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-bold text-2xl text-gray-800 dark:text-white leading-tight">
-                {{ __('Subject Categories & Subcategories') }}
-            </h2>
-            <a href="{{ route('admin.categories.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition duration-150 ease-in-out">
-                <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+    <div class="py-12 max-w-7xl mx-auto sm:px-6 lg:px-8">
+        
+        <!-- Alert Banner -->
+        @if(session('success'))
+            <div class="mb-6 p-4 bg-green-50 dark:bg-green-950/20 border-l-4 border-green-500 rounded-r-lg shadow-sm flex items-center text-green-800 dark:text-green-300">
+                <svg class="w-6 h-6 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                Add Category
-            </a>
-        </div>
-    </x-slot>
+                <span class="font-medium">{{ session('success') }}</span>
+            </div>
+        @endif
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row gap-6 items-start">
             
-            <!-- Alert Banner -->
-            @if(session('success'))
-                <div class="mb-6 p-4 bg-green-50 dark:bg-green-950/20 border-l-4 border-green-500 rounded-r-lg shadow-sm flex items-center text-green-800 dark:text-green-300">
-                    <svg class="w-6 h-6 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <span class="font-medium">{{ session('success') }}</span>
+            <!-- Left Sidebar -->
+            <aside class="w-full md:w-80 md:sticky md:top-6 space-y-6 flex-shrink-0">
+                <!-- Title & Add Category Card -->
+                <div class="bg-white rounded-2xl border border-gray-150 p-5 shadow-sm space-y-4">
+                    <h2 class="font-bold text-lg text-gray-800 leading-tight border-b border-gray-100 pb-3">
+                        Categories
+                    </h2>
+                    
+                    <div class="flex flex-col gap-2">
+                        <a href="{{ route('admin.categories.create') }}" class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase rounded-lg shadow-sm transition gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Add Category
+                        </a>
+                    </div>
                 </div>
-            @endif
+
+                <!-- Status Metadata Card -->
+                <div class="bg-white rounded-2xl border border-gray-150 p-5 shadow-sm space-y-4">
+                    <span class="text-xs font-bold text-gray-450 uppercase tracking-widest block border-b border-gray-100 pb-2">Status Overview</span>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-gray-500">Total Categories:</span>
+                        <span class="font-bold text-gray-800 bg-gray-50 px-2 py-0.5 rounded border border-gray-150">{{ count($categories) }}</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Right Main Column (Category Grid) -->
+            <main class="flex-grow w-full min-w-0">
 
             @if($categories->isEmpty())
                 <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl shadow-sm p-12 text-center">
@@ -118,7 +136,7 @@
                     @endforeach
                 </div>
             @endif
-
+            </main>
         </div>
     </div>
 </x-app-layout>

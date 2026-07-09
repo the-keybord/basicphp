@@ -4,6 +4,30 @@ namespace App\Services\QuestionEngine;
 
 class QuestionParser
 {
+    protected function getInnerXML(\SimpleXMLElement $element): string
+    {
+        $dom = dom_import_simplexml($element);
+        $inner = '';
+        foreach ($dom->childNodes as $child) {
+            $inner .= $dom->ownerDocument->saveXML($child);
+        }
+        return trim($inner);
+    }
+
+    protected function isStructured(\SimpleXMLElement $element): bool
+    {
+        if ($element->children()->count() === 0) {
+            return false;
+        }
+        $inlineTags = ['strong', 'bold', 'b', 'u', 'i', 'br', 'image', 'img'];
+        foreach ($element->children() as $child) {
+            if (!in_array(strtolower($child->getName()), $inlineTags)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function parse(string $xml): array
     {
         libxml_use_internal_errors(true);
@@ -26,7 +50,7 @@ class QuestionParser
 
         $text = '';
         if (isset($question->text)) {
-            $text = trim((string)$question->text);
+            $text = $this->getInnerXML($question->text);
         }
 
         // Also capture any @img() tokens sitting as raw text nodes directly inside
@@ -49,14 +73,14 @@ class QuestionParser
 
         if ($optionElements) {
             foreach ($optionElements as $option) {
-                if ($option->children()->count() > 0) {
+                if ($this->isStructured($option)) {
                     $optArray = [];
                     foreach ($option->children() as $child) {
-                        $optArray[$child->getName()] = trim((string)$child);
+                        $optArray[$child->getName()] = $this->getInnerXML($child);
                     }
                     $options[] = $optArray;
                 } else {
-                    $options[] = trim((string)$option);
+                    $options[] = $this->getInnerXML($option);
                 }
             }
         }
@@ -65,26 +89,26 @@ class QuestionParser
         $subjects = [];
         if (isset($question->subjects->subject)) {
             foreach ($question->subjects->subject as $sub) {
-                if ($sub->children()->count() > 0) {
+                if ($this->isStructured($sub)) {
                     $subOpts = [];
                     foreach ($sub->children() as $child) {
-                        $subOpts[] = trim((string)$child);
+                        $subOpts[] = $this->getInnerXML($child);
                     }
                     $subjects[] = $subOpts;
                 } else {
-                    $subjects[] = trim((string)$sub);
+                    $subjects[] = $this->getInnerXML($sub);
                 }
             }
         } elseif (isset($question->subject)) {
             foreach ($question->subject as $sub) {
-                if ($sub->children()->count() > 0) {
+                if ($this->isStructured($sub)) {
                     $subOpts = [];
                     foreach ($sub->children() as $child) {
-                        $subOpts[] = trim((string)$child);
+                        $subOpts[] = $this->getInnerXML($child);
                     }
                     $subjects[] = $subOpts;
                 } else {
-                    $subjects[] = trim((string)$sub);
+                    $subjects[] = $this->getInnerXML($sub);
                 }
             }
         }

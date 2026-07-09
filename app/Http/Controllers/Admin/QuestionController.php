@@ -108,6 +108,20 @@ class QuestionController extends Controller
             ->with('success', 'Question deleted successfully!');
     }
 
+    public function clone(Question $question)
+    {
+        $cloned = Question::create([
+            'primary_subcategory_id' => $question->primary_subcategory_id,
+            'secondary_subcategory_id' => $question->secondary_subcategory_id,
+            'question_type' => $question->question_type,
+            'xml_content' => $question->xml_content,
+            'correct_answer_string' => $question->correct_answer_string,
+        ]);
+
+        return redirect()->route('admin.questions.edit', $cloned)
+            ->with('success', 'Question cloned successfully! You can now modify it slightly.');
+    }
+
     public function preview(Question $question)
     {
         $parser = new QuestionParser();
@@ -123,7 +137,21 @@ class QuestionController extends Controller
         $prevId = $prevQuestion ? $prevQuestion->id : null;
         $nextId = $nextQuestion ? $nextQuestion->id : null;
 
-        return view('questions.preview', compact('parsed', 'question', 'prevId', 'nextId'));
+        $categories = Category::with('subcategories')->get();
+
+        return view('questions.preview', compact('parsed', 'question', 'prevId', 'nextId', 'categories'));
+    }
+
+    public function updateMapping(Request $request, Question $question)
+    {
+        $validated = $request->validate([
+            'primary_subcategory_id' => 'required|exists:subcategories,id',
+            'secondary_subcategory_id' => 'nullable|different:primary_subcategory_id|exists:subcategories,id',
+        ]);
+
+        $question->update($validated);
+
+        return back()->with('success', 'Question category mapping updated successfully!');
     }
 
     public function show(Question $question)

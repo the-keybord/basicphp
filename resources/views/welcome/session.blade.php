@@ -35,24 +35,45 @@
         .dark .text-gray-900,
         .dark .text-gray-850,
         .dark .text-gray-800,
-        .dark .text-gray-700 {
+        .dark .text-gray-700,
+        .dark .text-gray-650 {
             color: #f1f5f9 !important;
         }
-        .dark .text-gray-650,
         .dark .text-gray-600,
-        .dark .text-gray-500 {
+        .dark .text-gray-500,
+        .dark .text-gray-450,
+        .dark .text-gray-400 {
             color: #94a3b8 !important;
+        }
+        .dark .border-gray-150,
+        .dark .border-gray-200,
+        .dark .border-gray-250 {
+            border-color: #232535 !important;
+        }
+        .dark .bg-gray-100 {
+            background-color: #1e202e !important;
+            border-color: #2e3146 !important;
+            color: #94a3b8 !important;
+        }
+        .dark .bg-gray-100:hover {
+            background-color: #2a2d40 !important;
+            color: #f1f5f9 !important;
+        }
+        .dark select {
+            background-color: #161720 !important;
+            border-color: #232535 !important;
+            color: #f1f5f9 !important;
         }
         .dark header {
             background-color: #161720 !important;
             border-bottom: 1px solid #232535 !important;
         }
-        .dark .nav-dot {
+        .dark .nav-dot:not(.bg-blue-600) {
             background-color: #1e202e !important;
             border-color: #2e3146 !important;
             color: #94a3b8 !important;
         }
-        .dark .nav-dot:hover {
+        .dark .nav-dot:hover:not(.bg-blue-600) {
             border-color: #00aeef !important;
             background-color: rgba(0, 174, 239, 0.1) !important;
         }
@@ -77,86 +98,119 @@
 </head>
 <body class="bg-gray-50 antialiased min-h-screen flex flex-col justify-between select-none">
 
-    <!-- Floating Timer & Progress Header -->
-    <header class="sticky top-0 bg-white border-b border-gray-150 shadow-sm z-50">
-        <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div class="flex items-center justify-between sm:justify-start gap-4">
-                <div class="flex items-center gap-3">
-                    <img src="{{ asset('images/zeceinfoblock.png') }}" alt="ZeceInfo Logo" class="h-8 w-auto object-contain logo-toggle-trigger cursor-pointer">
-                    <div class="h-6 w-[1px] bg-gray-250"></div>
-                    <div>
-                        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest block">Student</span>
-                        <span class="font-bold text-gray-800 text-sm md:text-base">{{ $session->firstname }} {{ $session->lastname }}</span>
+    <form id="test-form" action="{{ route('test.submit', $session->token) }}" method="POST" class="flex-grow w-full max-w-7xl mx-auto px-4 py-6">
+        @csrf
+
+        <div class="flex flex-col md:flex-row gap-6 items-start">
+            
+            <!-- Left Sidebar (Branding, Timer, Progress, Navigator & Controls) -->
+            <aside class="w-full md:w-80 md:sticky md:top-6 space-y-6 flex-shrink-0">
+                <!-- Branding, Student Info & Theme Toggle Card -->
+                <div class="bg-white border border-gray-150 p-4 rounded-2xl shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <img src="{{ asset('images/zeceinfoblock.png') }}" alt="ZeceInfo Logo" class="h-8 w-auto object-contain logo-toggle-trigger cursor-pointer">
+                            <div class="h-6 w-[1px] bg-gray-250"></div>
+                            <div>
+                                <span class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block leading-tight">Student</span>
+                                <span class="font-bold text-gray-800 text-sm truncate max-w-[120px] block leading-tight">{{ $session->firstname }} {{ $session->lastname }}</span>
+                            </div>
+                        </div>
+                        <button type="button" class="logo-toggle-trigger p-1.5 text-slate-500 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white transition-colors duration-200 focus:outline-none" aria-label="Toggle Theme">
+                            <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+                            </svg>
+                            <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Timer Box -->
+                    <div id="timer-box" class="flex items-center justify-center space-x-3 px-4 py-3 bg-blue-50 border border-blue-100 text-blue-700 rounded-xl transition duration-300">
+                        <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span id="countdown-timer" class="font-mono text-2xl font-black tracking-wider">--:--</span>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="space-y-1.5 pt-2 border-t border-gray-100">
+                        <div class="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                            <span id="progress-text">Question 1 of {{ count($renderedQuestions) }}</span>
+                        </div>
+                        <div class="w-full bg-gray-150 h-2 rounded-full overflow-hidden">
+                            <div id="progress-bar-fill" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%;"></div>
+                        </div>
                     </div>
                 </div>
 
-                <button type="button" class="logo-toggle-trigger p-2 text-slate-500 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white transition-colors duration-200 focus:outline-none" aria-label="Toggle Theme">
-                    <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
-                    </svg>
-                    <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-                    </svg>
-                </button>
-                
-                <div id="timer-box" class="flex items-center space-x-3 px-5 py-2.5 bg-blue-50 border border-blue-100 text-blue-700 rounded-xl transition duration-300">
-                    <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <span id="countdown-timer" class="font-mono text-xl font-black tracking-wider">--:--</span>
+                <!-- Navigator Dots Card -->
+                <div class="bg-white border border-gray-150 p-4 rounded-2xl shadow-sm space-y-3">
+                    <span class="text-xs font-bold text-gray-450 uppercase tracking-widest block border-b border-gray-100 pb-2">Navigator</span>
+                    <div class="flex flex-wrap gap-2 justify-center">
+                        @foreach($renderedQuestions as $index => $q)
+                            <button type="button" 
+                                    id="nav-dot-{{ $index }}" 
+                                    onclick="showQuestion({{ $index }})" 
+                                    class="nav-dot w-7 h-7 flex items-center justify-center border-2 border-gray-250 text-gray-650 rounded-lg font-bold text-xs transition hover:border-blue-400 hover:bg-blue-50/10">
+                                {{ $index + 1 }}
+                            </button>
+                        @endforeach
+                    </div>
                 </div>
-            </div>
 
-            <!-- Progress Bar inside header -->
-            <div class="flex-1 max-w-xs sm:ml-auto">
-                <div class="flex justify-between items-center mb-1 text-xxs font-bold text-gray-400 uppercase tracking-wider">
-                    <span id="progress-text">Question 1 of {{ count($renderedQuestions) }}</span>
+                <!-- Control Buttons Card -->
+                <div class="bg-white border border-gray-150 p-4 rounded-2xl shadow-sm space-y-2.5">
+                    <span class="text-xs font-bold text-gray-450 uppercase tracking-widest block border-b border-gray-100 pb-2">Actions</span>
+                    <div class="flex flex-col gap-2">
+                        <button type="button" 
+                                id="prev-btn" 
+                                onclick="prevQuestion()" 
+                                class="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-sm rounded-xl transition flex items-center justify-center gap-1.5 border border-gray-200">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                            Previous
+                        </button>
+                        
+                        <button type="button" 
+                                id="next-btn" 
+                                onclick="nextQuestion()" 
+                                class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm">
+                            Next
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+
+                        <button type="submit" 
+                                id="submit-btn" 
+                                style="display: none;" 
+                                class="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold text-sm rounded-xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-1.5">
+                            Submit Test
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        </button>
+                    </div>
                 </div>
-                <div class="w-full bg-gray-150 h-2 rounded-full overflow-hidden">
-                    <div id="progress-bar-fill" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%;"></div>
-                </div>
-            </div>
-        </div>
-    </header>
+            </aside>
 
-    <main class="flex-grow max-w-4xl w-full mx-auto px-4 py-6 space-y-6">
-        
-        <!-- Navigator dots grid -->
-        <div class="bg-white border border-gray-150 p-4 rounded-2xl shadow-sm flex flex-wrap gap-2.5 items-center justify-center">
-            <span class="text-xxs font-bold text-gray-450 uppercase tracking-widest mr-2">Navigator:</span>
-            @foreach($renderedQuestions as $index => $q)
-                <button type="button" 
-                        id="nav-dot-{{ $index }}" 
-                        onclick="showQuestion({{ $index }})" 
-                        class="nav-dot w-9 h-9 flex items-center justify-center border-2 border-gray-250 text-gray-650 rounded-xl font-bold text-sm transition hover:border-blue-400 hover:bg-blue-50/10">
-                    {{ $index + 1 }}
-                </button>
-            @endforeach
-        </div>
-
-        <form id="test-form" action="{{ route('test.submit', $session->token) }}" method="POST" class="space-y-6">
-            @csrf
-
-            <!-- Question Cards -->
-            @foreach($renderedQuestions as $index => $q)
-                @php
-                    $qModel = $q['model'];
-                    $parsed = $q['parsed'];
-                @endphp
-                <div id="question-card-{{ $index }}" 
-                     class="question-card bg-white rounded-2xl border border-gray-150 shadow-sm overflow-hidden transition"
-                     style="display: none;">
+            <!-- Right Main Column (Active Question Area) -->
+            <main class="flex-grow w-full min-w-0">
+                <!-- Question Cards -->
+                @foreach($renderedQuestions as $index => $q)
+                    @php
+                        $qModel = $q['model'];
+                        $parsed = $q['parsed'];
+                    @endphp
+                    <div id="question-card-{{ $index }}" 
+                         class="question-card bg-white rounded-2xl border border-gray-150 shadow-sm overflow-hidden transition"
+                         style="display: none;">
                     
                     <!-- Card Top Header -->
                     <div class="px-6 py-4 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between">
                         <span class="text-xs font-bold text-blue-600 uppercase tracking-widest">
                             Question {{ $index + 1 }} of {{ count($renderedQuestions) }}
                         </span>
-                        <span class="text-xxs text-gray-400 uppercase font-semibold">
-                            Type: {{ str_replace('_', ' ', $qModel->question_type) }}
-                        </span>
                     </div>
 
+                    <div class="p-6 space-y-6">
                         @php
                             $questionText = $parsed['text'];
                             $hasInlineDropdowns = false;
@@ -172,7 +226,7 @@
                                         $optionsHtml .= '<option value="' . htmlspecialchars(strip_tags($option)) . '">' . strip_tags($option) . '</option>';
                                     }
                                     
-                                    return '<select name="answers[' . $qModel->id . '][]" class="inline-block border-gray-300 rounded-lg py-1.5 px-3 mx-1 text-sm text-gray-700 font-medium bg-white focus:ring-blue-500 shadow-sm align-middle max-w-[200px]">' . $optionsHtml . '</select>';
+                                    return '<select name="answers[' . $qModel->id . '][]" class="inline-block border-gray-300 rounded-lg py-1.5 pl-3 pr-8 mx-1 text-sm text-gray-700 font-medium bg-white focus:ring-blue-500 shadow-sm align-middle w-auto max-w-full">' . $optionsHtml . '</select>';
                                 }, $questionText);
                             }
                         @endphp
@@ -324,35 +378,9 @@
                     </div>
                 </div>
             @endforeach
-
-            <!-- Navigation Bar (Previous, Next, Submit buttons) -->
-            <div class="bg-gray-800 rounded-xl p-4 flex justify-between items-center text-white shadow-md">
-                <button type="button" 
-                        id="prev-btn" 
-                        onclick="prevQuestion()" 
-                        class="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition-all flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
-                    Previous
-                </button>
-                
-                <button type="button" 
-                        id="next-btn" 
-                        onclick="nextQuestion()" 
-                        class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all flex items-center gap-1">
-                    Next
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
-                </button>
-
-                <button type="submit" 
-                        id="submit-btn" 
-                        style="display: none;" 
-                        class="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow-md transition transform active:scale-95 flex items-center gap-1">
-                    Submit Test
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                </button>
-            </div>
-        </form>
-    </main>
+            </main>
+        </div>
+    </form>
 
     <!-- JS for Countdown Timer, Pagination, and Sync -->
     <script>

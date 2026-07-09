@@ -61,7 +61,7 @@ class AccessCodeController extends Controller
             };
         }
 
-        AccessCode::create([
+        $codeModel = AccessCode::create([
             'code' => $code,
             'type' => $request->type,
             'test_id' => $request->type === 'testing' ? $request->test_id : null,
@@ -71,7 +71,9 @@ class AccessCodeController extends Controller
         ]);
 
         return redirect()->route('admin.codes.index')
-            ->with('success', 'Access Code generated successfully: ' . $code);
+            ->with('success', 'Access Code generated successfully: ' . $code)
+            ->with('new_code', $code)
+            ->with('new_code_test', $codeModel->test ? $codeModel->test->name : 'Test Session');
     }
 
     public function destroy(AccessCode $code)
@@ -79,5 +81,26 @@ class AccessCodeController extends Controller
         $code->delete();
         return redirect()->route('admin.codes.index')
             ->with('success', 'Access Code deleted successfully!');
+    }
+
+    public function extend10Mins(AccessCode $code)
+    {
+        $baseTime = ($code->expires_at && $code->expires_at->isFuture()) ? $code->expires_at : now();
+        $code->update([
+            'expires_at' => $baseTime->addMinutes(10),
+        ]);
+
+        return redirect()->route('admin.codes.index')
+            ->with('success', 'Access Code ' . $code->code . ' extended by 10 minutes.');
+    }
+
+    public function expireNow(AccessCode $code)
+    {
+        $code->update([
+            'expires_at' => now(),
+        ]);
+
+        return redirect()->route('admin.codes.index')
+            ->with('success', 'Access Code ' . $code->code . ' has been expired.');
     }
 }

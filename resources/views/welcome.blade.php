@@ -342,16 +342,20 @@
             const mobileLinks = mobileMenu.querySelectorAll('a');
 
             // Toggle drawer menu
-            navbarToggler.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
-            });
+            if (navbarToggler) {
+                navbarToggler.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
 
             // Close menu when links are clicked
-            mobileLinks.forEach(link => {
-                link.addEventListener('click', () => {
-                    mobileMenu.classList.add('hidden');
+            if (mobileMenu && mobileLinks) {
+                mobileLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        mobileMenu.classList.add('hidden');
+                    });
                 });
-            });
+            }
 
             // Close menu when resize goes desktop
             window.addEventListener('resize', () => {

@@ -33,6 +33,10 @@ Route::middleware('auth')->group(function () {
         Route::resource('questions', QuestionController::class);
         Route::get('questions/{question}/preview', [QuestionController::class, 'preview'])
             ->name('questions.preview');
+        Route::post('questions/{question}/clone', [QuestionController::class, 'clone'])
+            ->name('questions.clone');
+        Route::post('questions/{question}/update-mapping', [QuestionController::class, 'updateMapping'])
+            ->name('questions.update-mapping');
         Route::post('questions/upload-image', [QuestionController::class, 'uploadImage'])
             ->name('questions.upload-image');
         Route::get('questions/{question}/set-answer', [QuestionController::class, 'setAnswer'])
@@ -47,6 +51,10 @@ Route::middleware('auth')->group(function () {
             ->name('tests.toggle');
 
         Route::resource('codes', AccessCodeController::class);
+        Route::post('codes/{code}/extend-10-mins', [AccessCodeController::class, 'extend10Mins'])
+            ->name('codes.extend-10-mins');
+        Route::post('codes/{code}/expire-now', [AccessCodeController::class, 'expireNow'])
+            ->name('codes.expire-now');
 
         Route::resource('categories', CategoryController::class);
         Route::resource('subcategories', SubcategoryController::class);
