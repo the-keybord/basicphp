@@ -32,9 +32,13 @@ class AccessCodeController extends Controller
             'expires_unit' => 'required_with:expires_value|string|in:minutes,hours,days',
         ]);
 
-        // Generate unique 6-character uppercase code
+        // Generate unique 6-character uppercase code (excluding confusing characters O and 0)
+        $pool = 'ABCDEFGHIJKLMNPQRSTUVWXYZ123456789';
         do {
-            $code = strtoupper(Str::random(6));
+            $code = '';
+            for ($i = 0; $i < 6; $i++) {
+                $code .= $pool[random_int(0, strlen($pool) - 1)];
+            }
         } while (AccessCode::where('code', $code)->exists());
 
         $rules = [];
@@ -102,5 +106,74 @@ class AccessCodeController extends Controller
 
         return redirect()->route('admin.codes.index')
             ->with('success', 'Access Code ' . $code->code . ' has been expired.');
+    }
+
+    public function analytics(AccessCode $code)
+    {
+        $code->load(['test']);
+        
+        // Get all completed student sessions for this access code
+        $sessions = \App\Models\TestSession::where('access_code_id', $code->id)
+            ->whereNotNull('completed_at')
+            ->get();
+            
+        // Get the blueprint questions
+        $blueprintIds = $code->test->question_ids ?? [];
+        $questions = \App\Models\Question::whereIn('id', $blueprintIds)->get()->keyBy('id');
+        
+        // Order questions according to blueprint
+        $orderedQuestions = collect($blueprintIds)
+            ->map(fn($id) => $questions->get($id))
+            ->filter();
+            
+        // Calculate analytics per question
+        $questionAnalytics = [];
+        foreach ($orderedQuestions as $index => $q) {
+            $correctCount = 0;
+            $incorrectCount = 0;
+            $emptyCount = 0;
+            
+            foreach ($sessions as $session) {
+                $ans = $session->answers[$q->id] ?? '';
+                $correct = $q->correct_answer_string ?? '';
+                
+                $isEmpty = trim((string)$ans) === '';
+                
+                $cleanedUser = html_entity_decode(strtolower(trim($ans)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $cleanedCorrect = html_entity_decode(strtolower(trim($correct)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                
+                if ($isEmpty) {
+                    $emptyCount++;
+                } elseif ($cleanedUser === $cleanedCorrect && trim($correct) !== '') {
+                    $correctCount++;
+                } else {
+                    $incorrectCount++;
+                }
+            }
+            
+            $total = $sessions->count();
+            $successRate = $total > 0 ? round(($correctCount / $total) * 100) : 0;
+            
+            $questionAnalytics[] = [
+                'model' => $q,
+                'index' => $index + 1,
+                'correct' => $correctCount,
+                'incorrect' => $incorrectCount,
+                'empty' => $emptyCount,
+                'success_rate' => $successRate,
+            ];
+        }
+        
+        // Sort questions by difficulty (success rate ascending)
+        $troublesomeQuestions = collect($questionAnalytics)->sortBy('success_rate')->values();
+
+        // Calculate average score across all completed sessions
+        $avgScore = 0;
+        $totalQuestions = count($blueprintIds);
+        if ($sessions->isNotEmpty() && $totalQuestions > 0) {
+            $avgScore = round($sessions->avg('score'), 1);
+        }
+
+        return view('admin.codes.analytics', compact('code', 'sessions', 'orderedQuestions', 'questionAnalytics', 'troublesomeQuestions', 'avgScore', 'totalQuestions'));
     }
 }

@@ -48,9 +48,12 @@ class SessionController extends Controller
         // Dynamically recalculate/update score when reviewing the session
         $session->recalculateScore();
 
-        // Fetch questions in display order
-        $questionsMap = Question::whereIn('id', $session->questions_order)->get()->keyBy('id');
-        $orderedQuestions = collect($session->questions_order)
+        // Fetch questions in the order of the blueprint, falling back to student session's question order
+        $blueprintIds = $session->accessCode->test->question_ids ?? [];
+        $orderOfQuestions = (!empty($blueprintIds)) ? $blueprintIds : ($session->questions_order ?? []);
+
+        $questionsMap = Question::whereIn('id', $orderOfQuestions)->get()->keyBy('id');
+        $orderedQuestions = collect($orderOfQuestions)
             ->map(fn($id) => $questionsMap->get($id))
             ->filter();
 

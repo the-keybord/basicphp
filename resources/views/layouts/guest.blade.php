@@ -13,7 +13,7 @@
             }
         </script>
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>ZeceInfo</title>
 
         <!-- Favicon -->
         <link class="favicon" rel="icon" type="image/png" href="{{ asset('images/zeceinfoblock.png') }}">

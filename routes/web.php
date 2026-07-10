@@ -55,6 +55,8 @@ Route::middleware('auth')->group(function () {
             ->name('codes.extend-10-mins');
         Route::post('codes/{code}/expire-now', [AccessCodeController::class, 'expireNow'])
             ->name('codes.expire-now');
+        Route::get('codes/{code}/analytics', [AccessCodeController::class, 'analytics'])
+            ->name('codes.analytics');
 
         Route::resource('categories', CategoryController::class);
         Route::resource('subcategories', SubcategoryController::class);

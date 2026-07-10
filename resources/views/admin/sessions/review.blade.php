@@ -1,4 +1,8 @@
-<x-app-layout>
+<x-app-layout title="Review Session: {{ $session->firstname }} {{ $session->lastname }}">
+    @php
+        $percentage = $session->total_questions > 0 ? round(($session->score / $session->total_questions) * 100) : 0;
+        $scoreColor = $percentage >= 70 ? 'text-green-600' : ($percentage >= 50 ? 'text-amber-600' : 'text-red-600');
+    @endphp
     <div class="py-12 max-w-7xl mx-auto sm:px-6 lg:px-8">
         
         <div class="flex flex-col md:flex-row gap-6 items-start">
@@ -19,10 +23,51 @@
                     </div>
                     
                     <div class="space-y-1">
-                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Student</span>
-                        <h3 class="text-lg font-black text-blue-600 capitalize leading-tight">
-                            {{ $session->firstname }} {{ $session->lastname }}
-                        </h3>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Student & Grade</span>
+                        <div class="flex items-baseline justify-between gap-2">
+                            <h3 class="text-base font-black text-blue-600 capitalize leading-tight truncate" title="{{ $session->firstname }} {{ $session->lastname }}">
+                                {{ $session->firstname }} {{ $session->lastname }}
+                            </h3>
+                            <div class="text-right flex-shrink-0">
+                                <span class="text-sm font-black {{ $scoreColor }}">
+                                    {{ $session->score ?? 0 }}<span class="text-[10px] text-gray-400 font-bold">/{{ $session->total_questions }}</span>
+                                </span>
+                                <span class="text-[9px] text-gray-450 font-black block">({{ $percentage }}%)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mini Questions Overview Grid inside the student card -->
+                    <div class="space-y-1.5 pt-2.5 border-t border-gray-100">
+                        <span class="text-[9px] font-black text-gray-400 uppercase tracking-wider block">Questions Overview</span>
+                        <div class="flex flex-wrap gap-1">
+                            @foreach($renderedQuestions as $index => $q)
+                                @php
+                                    $qModel = $q['model'];
+                                    $studentAnswer = $session->answers[$qModel->id] ?? '';
+                                    $correctAnswer = $qModel->correct_answer_string ?? '';
+                                         
+                                    $isEmpty = trim((string)$studentAnswer) === '';
+                                    $isCorrect = false;
+                                         
+                                    $cleanedUser = html_entity_decode(strtolower(trim($studentAnswer)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                                    $cleanedCorrect = html_entity_decode(strtolower(trim($correctAnswer)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                                         
+                                    if (!$isEmpty && $cleanedUser === $cleanedCorrect && trim($correctAnswer) !== '') {
+                                         $isCorrect = true;
+                                    }
+
+                                    $badgeBg = $isEmpty ? 'bg-gray-50 text-gray-450 border-gray-200 hover:bg-gray-100' : ($isCorrect ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100/70' : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100/70');
+                                @endphp
+                                <a 
+                                    href="#question-{{ $qModel->id }}" 
+                                    class="w-[24px] h-[24px] inline-flex items-center justify-center text-[9px] font-bold rounded border transition {{ $badgeBg }} cursor-pointer"
+                                    title="Question {{ $index + 1 }}: {{ $isCorrect ? 'Correct' : ($isEmpty ? 'Unanswered' : 'Incorrect') }}"
+                                >
+                                    {{ $index + 1 }}
+                                </a>
+                            @endforeach
+                        </div>
                     </div>
 
                     <div class="flex items-center justify-between text-xs pt-2 border-t border-gray-100">
@@ -44,11 +89,11 @@
                     <span class="text-xs font-bold text-gray-455 uppercase tracking-widest block border-b border-gray-100 pb-2">Test Details</span>
                     <div class="space-y-3">
                         <div class="space-y-0.5">
-                            <span class="text-[10px] font-bold text-gray-450 uppercase block">Blueprint</span>
+                            <span class="text-[10px] font-bold text-gray-455 uppercase block">Blueprint</span>
                             <span class="text-sm font-bold text-gray-900 block leading-snug">{{ $session->accessCode->test->name ?? 'N/A' }}</span>
                         </div>
                         <div class="space-y-0.5">
-                            <span class="text-[10px] font-bold text-gray-450 uppercase block">Started</span>
+                            <span class="text-[10px] font-bold text-gray-455 uppercase block">Started</span>
                             <span class="text-xs text-gray-700 block">{{ $session->started_at->format('M d, Y h:i A') }}</span>
                         </div>
                         @if($session->completed_at)
@@ -57,34 +102,16 @@
                                 <span class="text-xs text-gray-700 block">{{ $session->completed_at->format('M d, Y h:i A') }}</span>
                             </div>
                         @endif
-                    </div>
-                </div>
-
-                <!-- Score / Grade Card -->
-                <div class="bg-white rounded-2xl border border-gray-150 p-5 shadow-sm space-y-4">
-                    <span class="text-xs font-bold text-gray-455 uppercase tracking-widest block border-b border-gray-100 pb-2">Grading Summary</span>
-                    @php
-                        $percentage = $session->total_questions > 0 ? round(($session->score / $session->total_questions) * 100) : 0;
-                        $scoreColor = $percentage >= 70 ? 'text-green-600' : ($percentage >= 50 ? 'text-amber-600' : 'text-red-600');
-                        $scoreBg = $percentage >= 70 ? 'bg-green-50/50 border-green-100' : ($percentage >= 50 ? 'bg-amber-50/50 border-amber-100' : 'bg-red-50/50 border-red-100');
-                    @endphp
-                    <div class="rounded-xl p-4 border flex flex-col justify-center items-center text-center {{ $scoreBg }}">
-                        <span class="text-[10px] font-bold text-gray-455 uppercase tracking-widest block mb-1">Total Score</span>
-                        <div class="text-3xl font-black {{ $scoreColor }}">
-                            {{ $session->score ?? 0 }} <span class="text-sm text-gray-400">/ {{ $session->total_questions }}</span>
+                        <div class="space-y-0.5">
+                            <span class="text-[10px] font-bold text-gray-455 uppercase block">Duration</span>
+                            <span class="text-xs text-gray-700 block font-bold">
+                                @if($session->completed_at)
+                                    {{ (int) $session->started_at->diffInMinutes($session->completed_at) }} mins
+                                @else
+                                    {{ (int) $session->started_at->diffInMinutes(now()) }} mins
+                                @endif
+                            </span>
                         </div>
-                        <span class="text-[10px] font-bold text-gray-500 mt-1 uppercase">Grade: {{ $percentage }}%</span>
-                    </div>
-
-                    <div class="flex items-center justify-between text-xs pt-2 border-t border-gray-100">
-                        <span class="text-gray-500">Duration:</span>
-                        <span class="font-bold text-gray-800">
-                            @if($session->completed_at)
-                                {{ $session->started_at->diffInMinutes($session->completed_at) }} mins
-                            @else
-                                {{ $session->started_at->diffInMinutes(now()) }} mins
-                            @endif
-                        </span>
                     </div>
                 </div>
             </aside>
@@ -120,7 +147,7 @@
                         $statusBg = $isEmpty ? 'bg-gray-50 text-gray-700 border-gray-200' : ($isCorrect ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200');
                     @endphp
                     
-                    <div class="bg-white rounded-xl border-2 {{ $cardBorder }} shadow-sm overflow-hidden">
+                    <div id="question-{{ $qModel->id }}" class="bg-white rounded-xl border-2 {{ $cardBorder }} shadow-sm overflow-hidden scroll-mt-24">
                         <!-- Card Header -->
                         <div class="px-6 py-4 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between">
                             <div class="flex items-center space-x-2">

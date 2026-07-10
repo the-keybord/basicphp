@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Exam Sessions">
     <div class="py-12 max-w-7xl mx-auto sm:px-6 lg:px-8">
         
         @if(session('success'))
@@ -114,8 +114,8 @@
                                             $duration = $session->accessCode->test->duration_minutes ?? 45;
                                             
                                             if (!$isCompleted) {
-                                                $elapsed = now()->diffInMinutes($session->started_at);
-                                                $remaining = max(0, $duration - $elapsed);
+                                                $elapsed = (int) now()->diffInMinutes($session->started_at);
+                                                $remaining = (int) max(0, $duration - $elapsed);
                                             }
                                         @endphp
                                         <tr class="hover:bg-gray-50/50 transition">

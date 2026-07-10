@@ -81,7 +81,14 @@
             }
         </style>
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>
+            @if(isset($title) && !empty($title))
+                {{ $title }} |
+            @elseif(isset($attributes) && $attributes->has('title') && !empty($attributes->get('title')))
+                {{ $attributes->get('title') }} |
+            @endif
+            ZeceInfo
+        </title>
 
         <!-- Favicon -->
         <link rel="icon" type="image/png" href="{{ asset('images/zeceinfoblock.png') }}">

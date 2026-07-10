@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Preview: {{ $test->name }}">
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
@@ -88,7 +88,7 @@
                             $formattedType = str_replace('_', ' ', $qModel->question_type);
                         @endphp
                         
-                        <div class="bg-white rounded-2xl border border-gray-150 shadow-sm overflow-hidden scroll-mt-6" id="question-card-{{ $index + 1 }}">
+                        <div class="bg-white rounded-2xl border border-gray-150 shadow-sm overflow-hidden scroll-mt-24" id="question-{{ $qModel->id }}">
                             
                             <!-- Header Info -->
                             <div class="p-6 border-b border-gray-100 bg-gray-50/50 flex flex-wrap items-center justify-between gap-3">
