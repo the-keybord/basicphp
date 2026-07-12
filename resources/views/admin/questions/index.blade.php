@@ -37,6 +37,13 @@
                                 Slideshow Review
                             </a>
                         @endif
+
+                        <a href="{{ route('admin.questions.siblings') }}" class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold uppercase rounded-lg shadow-sm transition gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            Sister Questions
+                        </a>
                     </div>
                 </div>
 
@@ -84,26 +91,17 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="id">
+                                    <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="id">
                                         ID <span class="sort-icon ml-1 text-gray-400">⇅</span>
                                     </th>
-                                    <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="type">
+                                    <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="type">
                                         Type <span class="sort-icon ml-1 text-gray-400">⇅</span>
                                     </th>
-                                    <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="primary">
+                                    <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="primary">
                                         Primary Subcategory <span class="sort-icon ml-1 text-gray-400">⇅</span>
                                     </th>
-                                    <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="secondary">
+                                    <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="secondary">
                                         Secondary Subcategory <span class="sort-icon ml-1 text-gray-400">⇅</span>
-                                    </th>
-                                    <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="answer">
-                                        Correct Answer <span class="sort-icon ml-1 text-gray-400">⇅</span>
-                                    </th>
-                                    <th class="sortable cursor-pointer hover:bg-gray-100 select-none px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider transition" data-col="created">
-                                        Created <span class="sort-icon ml-1 text-gray-400">⇅</span>
-                                    </th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        Actions
                                     </th>
                                 </tr>
                             </thead>
@@ -114,7 +112,8 @@
                                         preg_match('/<text>(.*?)<\/text>/s', $question->xml_content, $textMatch);
                                         $questionText = isset($textMatch[1]) ? strip_tags(html_entity_decode($textMatch[1])) : '';
                                     @endphp
-                                    <tr class="question-row hover:bg-gray-50/50 transition"
+                                    <!-- Row 1: Metadata -->
+                                    <tr class="question-row hover:bg-gray-50/30 transition"
                                         data-id="{{ $question->id }}"
                                         data-type="{{ $question->question_type }}"
                                         data-primary="{{ optional($question->primarySubcategory)->name ?? '' }}"
@@ -122,10 +121,10 @@
                                         data-answer="{{ $question->correct_answer_string }}"
                                         data-created="{{ $question->created_at->timestamp }}"
                                         data-text="{{ $questionText }}">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-700">
+                                        <td class="px-4 py-2.5 whitespace-nowrap text-xs font-semibold text-gray-700">
                                             #{{ $question->id }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-4 py-2.5 whitespace-nowrap">
                                             @php
                                                 $badgeColors = [
                                                     'multiselect' => 'bg-purple-50 text-purple-700 border-purple-100',
@@ -137,57 +136,65 @@
                                                 $color = $badgeColors[$question->question_type] ?? 'bg-gray-50 text-gray-700 border-gray-100';
                                                 $formattedType = str_replace('_', ' ', $question->question_type);
                                             @endphp
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border {{ $color }} capitalize">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold border {{ $color }} capitalize">
                                                 {{ $formattedType }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                            @if($question->primarySubcategory)
-                                                <span class="text-xs text-gray-400 block font-medium uppercase tracking-wider">{{ $question->primarySubcategory->category->name }}</span>
-                                                <span class="font-medium text-gray-900">{{ $question->primarySubcategory->name }}</span>
-                                            @else
-                                                <span class="text-gray-400">—</span>
-                                            @endif
+                                        <td class="px-4 py-2.5 text-xs text-gray-600">
+                                            <div class="max-w-[200px] truncate" title="{{ optional($question->primarySubcategory)->name ?? '' }}">
+                                                @if($question->primarySubcategory)
+                                                    <span class="text-[9px] text-gray-400 block font-medium uppercase tracking-wider truncate">{{ $question->primarySubcategory->category->name }}</span>
+                                                    <span class="font-medium text-xs text-gray-900 truncate">{{ $question->primarySubcategory->name }}</span>
+                                                @else
+                                                    <span class="text-gray-400">—</span>
+                                                @endif
+                                            </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                            @if($question->secondarySubcategory)
-                                                <span class="text-xs text-gray-400 block font-medium uppercase tracking-wider">{{ $question->secondarySubcategory->category->name }}</span>
-                                                <span class="font-medium text-gray-900">{{ $question->secondarySubcategory->name }}</span>
-                                            @else
-                                                <span class="text-gray-400 italic">None</span>
-                                            @endif
+                                        <td class="px-4 py-2.5 text-xs text-gray-600">
+                                            <div class="max-w-[200px] truncate" title="{{ optional($question->secondarySubcategory)->name ?? '' }}">
+                                                @if($question->secondarySubcategory)
+                                                    <span class="text-[9px] text-gray-400 block font-medium uppercase tracking-wider truncate">{{ $question->secondarySubcategory->category->name }}</span>
+                                                    <span class="font-medium text-xs text-gray-900 truncate">{{ $question->secondarySubcategory->name }}</span>
+                                                @else
+                                                    <span class="text-gray-400 italic">None</span>
+                                                @endif
+                                            </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                                            {{ Str::limit($question->correct_answer_string, 20) ?: 'N/A' }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ $question->created_at->format('M d, Y') }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <div class="flex items-center justify-end space-x-1.5">
-                                                <!-- Preview -->
-                                                <a href="{{ route('admin.questions.preview', $question) }}" class="inline-flex items-center p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg border border-transparent hover:border-blue-100 transition" title="Preview Question">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                                    </svg>
-                                                </a>
-                                                <!-- Edit -->
-                                                <a href="{{ route('admin.questions.edit', $question) }}" class="inline-flex items-center p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg border border-transparent hover:border-amber-100 transition" title="Edit Question">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                                    </svg>
-                                                </a>
-                                                <!-- Delete -->
-                                                <form action="{{ route('admin.questions.destroy', $question) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this question?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="inline-flex items-center p-1.5 text-red-600 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-100 transition" title="Delete Question">
-                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </tr>
+                                    <!-- Row 2: Text Preview & Actions -->
+                                    <tr class="question-row-details border-b border-gray-150 bg-gray-50/20 hover:bg-gray-50/40 transition" data-id="{{ $question->id }}">
+                                        <td colspan="4" class="px-4 py-2">
+                                            <div class="flex items-center gap-4">
+                                                <!-- Action Buttons -->
+                                                <div class="flex items-center space-x-1.5 flex-shrink-0">
+                                                    <!-- Preview -->
+                                                    <a href="{{ route('admin.questions.preview', $question) }}" class="inline-flex items-center p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg border border-transparent hover:border-blue-100 transition" title="Preview Question">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                                         </svg>
-                                                    </button>
-                                                </form>
+                                                    </a>
+                                                    <!-- Edit -->
+                                                    <a href="{{ route('admin.questions.edit', $question) }}" class="inline-flex items-center p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg border border-transparent hover:border-amber-100 transition" title="Edit Question">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                        </svg>
+                                                    </a>
+                                                    <!-- Delete -->
+                                                    <form action="{{ route('admin.questions.destroy', $question) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this question?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="inline-flex items-center p-1.5 text-red-600 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-100 transition" title="Delete Question">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                            </svg>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                                <!-- Stripped XML content text -->
+                                                <div class="text-[10px] text-gray-400 font-normal truncate max-w-[800px]" title="{{ $questionText }}">
+                                                    <span class="font-bold text-gray-505 mr-1">Preview:</span> "{{ $questionText }}"
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
@@ -216,15 +223,21 @@
                     let visibleCount = 0;
 
                     rows.forEach(row => {
-                        // Concatenate text content and question text to search universally across columns
+                        const id = row.getAttribute('data-id');
+                        const detailsRow = document.querySelector(`.question-row-details[data-id="${id}"]`);
+                        
                         const textContent = row.textContent.toLowerCase();
+                        const detailsText = detailsRow ? detailsRow.textContent.toLowerCase() : '';
                         const questionText = (row.getAttribute('data-text') || '').toLowerCase();
-                        const text = textContent + ' ' + questionText;
+                        const text = textContent + ' ' + detailsText + ' ' + questionText;
+
                         if (text.includes(query)) {
                             row.style.display = '';
+                            if (detailsRow) detailsRow.style.display = '';
                             visibleCount++;
                         } else {
                             row.style.display = 'none';
+                            if (detailsRow) detailsRow.style.display = 'none';
                         }
                     });
 
@@ -280,8 +293,14 @@
                         return 0;
                     });
 
-                    // Re-append sorted rows to the table DOM
-                    sortedRows.forEach(row => tableBody.appendChild(row));
+                    // Re-append sorted rows to the table DOM along with their details row
+                    sortedRows.forEach(row => {
+                        tableBody.appendChild(row);
+                        const detailsRow = document.querySelector(`.question-row-details[data-id="${row.getAttribute('data-id')}"]`);
+                        if (detailsRow) {
+                            tableBody.appendChild(detailsRow);
+                        }
+                    });
                 });
             });
         });

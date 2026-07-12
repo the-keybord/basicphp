@@ -151,7 +151,7 @@
                                 @if($hasInlineDropdowns)
                                     <div class="text-lg font-medium text-gray-800 leading-relaxed whitespace-pre-wrap">{!! $questionText !!}</div>
                                 @else
-                                    <pre class="text-lg font-medium text-gray-800 leading-relaxed" style="font-family:inherit;white-space:pre-wrap;margin:0;padding:0;background:transparent;border:none;overflow:visible;"@if($qModel->question_type === 'drag_and_drop') id="dnd-text-{{ $index }}" @endif>{!! $parsed['text'] !!}</pre>
+                                    <div class="text-lg font-medium text-gray-800 leading-relaxed" style="font-family:inherit;white-space:pre-wrap;margin:0;padding:0;background:transparent;border:none;overflow:visible;"@if($qModel->question_type === 'drag_and_drop') id="dnd-text-{{ $index }}" @endif>{!! $parsed['text'] !!}</div>
                                 @endif
 
                                 <!-- Image Diagram -->

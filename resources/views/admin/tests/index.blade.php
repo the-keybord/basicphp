@@ -61,11 +61,11 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Test Name</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Number of Questions</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Created</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-100">
@@ -74,27 +74,8 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-700">
                                             #{{ $test->id }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                                            {{ $test->name }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-blue-50 text-blue-700 border-blue-100">
-                                                {{ count($test->question_ids) }} Questions
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <form action="{{ route('admin.tests.toggle', $test) }}" method="POST" class="inline-block">
-                                                @csrf
-                                                <button type="submit" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border transition duration-150 cursor-pointer shadow-sm {{ $test->is_active ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100' }}" title="Click to toggle active status">
-                                                    {{ $test->is_active ? 'Active' : 'Inactive' }}
-                                                </button>
-                                            </form>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ $test->created_at->format('M d, Y h:i A') }}
-                                        </td>
-                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                             <div class="flex items-center justify-end space-x-1.5">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                             <div class="flex items-center space-x-1.5">
                                                  <!-- Preview Test -->
                                                  <a href="{{ route('admin.tests.preview', $test) }}" class="inline-flex items-center p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg border border-transparent hover:border-blue-100 transition" title="Preview Test Blueprint">
                                                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,6 +99,25 @@
                                                      </button>
                                                  </form>
                                              </div>
+                                         </td>
+                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                                             {{ $test->name }}
+                                         </td>
+                                         <td class="px-6 py-4 whitespace-nowrap">
+                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-blue-50 text-blue-700 border-blue-100">
+                                                 {{ count($test->question_ids) }} Questions
+                                             </span>
+                                         </td>
+                                         <td class="px-6 py-4 whitespace-nowrap">
+                                             <form action="{{ route('admin.tests.toggle', $test) }}" method="POST" class="inline-block">
+                                                 @csrf
+                                                 <button type="submit" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border transition duration-150 cursor-pointer shadow-sm {{ $test->is_active ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100' }}" title="Click to toggle active status">
+                                                     {{ $test->is_active ? 'Active' : 'Inactive' }}
+                                                 </button>
+                                             </form>
+                                         </td>
+                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                             {{ $test->created_at->format('M d, Y h:i A') }}
                                          </td>
                                     </tr>
                                 @endforeach

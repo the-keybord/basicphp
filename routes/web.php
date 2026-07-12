@@ -28,8 +28,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
-
     Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('questions/siblings', [QuestionController::class, 'siblings'])
+            ->name('questions.siblings');
+        Route::post('questions/siblings/accept', [QuestionController::class, 'acceptSibling'])
+            ->name('questions.siblings.accept');
+        Route::post('questions/siblings/reject', [QuestionController::class, 'rejectSibling'])
+            ->name('questions.siblings.reject');
+        Route::post('questions/siblings/unpair', [QuestionController::class, 'unpairSibling'])
+            ->name('questions.siblings.unpair');
         Route::resource('questions', QuestionController::class);
         Route::get('questions/{question}/preview', [QuestionController::class, 'preview'])
             ->name('questions.preview');

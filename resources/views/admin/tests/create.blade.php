@@ -51,6 +51,16 @@
                             <input type="number" name="duration_minutes" id="duration_minutes" min="1" value="{{ old('duration_minutes', $categories->first()->default_test_time ?? 45) }}" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2.5" required>
                         </div>
                     </div>
+                    <!-- Sibling Exclusion Checkbox -->
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <label class="inline-flex items-center text-sm font-semibold text-gray-700 cursor-pointer">
+                            <input type="checkbox" name="ignore_siblings" value="1" {{ old('ignore_siblings') ? 'checked' : '' }} class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500 h-4.5 w-4.5 transition cursor-pointer">
+                            <span class="ml-2.5">Ignore Sister Sibling Constraints</span>
+                        </label>
+                        <span class="block text-[10px] text-gray-400 font-medium mt-1 pl-7 leading-relaxed">
+                            If checked, the random draw will ignore linked sister/sibling relationships and can put similar questions in the same test.
+                        </span>
+                    </div>
                 </div>
 
                 <!-- Categories Grid -->

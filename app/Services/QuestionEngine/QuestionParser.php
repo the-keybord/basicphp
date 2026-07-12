@@ -50,13 +50,14 @@ class QuestionParser
 
         $text = '';
         if (isset($question->text)) {
-            $text = $this->getInnerXML($question->text);
+            $text = htmlspecialchars_decode($this->getInnerXML($question->text), ENT_QUOTES);
         }
 
         // Also capture any @img() tokens sitting as raw text nodes directly inside
         // <question> but outside of <text> (e.g. placed between </text> and <option>).
-        // Strip all XML tags from the raw input and search for floating @img() tokens.
-        $rawStripped = preg_replace('/<[^>]+>/', '', $xml);
+        // Remove the <text>...</text> block entirely first to avoid matching tokens inside the text
+        $xmlWithoutText = preg_replace('/<text\b[^>]*>(.*?)<\/text>/is', '', $xml);
+        $rawStripped = preg_replace('/<[^>]+>/', '', $xmlWithoutText);
         preg_match_all("/@img\('[^']+'\)/", $rawStripped, $floatingImgs);
         if (!empty($floatingImgs[0])) {
             $text .= "\n" . implode("\n", $floatingImgs[0]);
@@ -76,11 +77,11 @@ class QuestionParser
                 if ($this->isStructured($option)) {
                     $optArray = [];
                     foreach ($option->children() as $child) {
-                        $optArray[$child->getName()] = $this->getInnerXML($child);
+                        $optArray[$child->getName()] = htmlspecialchars_decode($this->getInnerXML($child), ENT_QUOTES);
                     }
                     $options[] = $optArray;
                 } else {
-                    $options[] = $this->getInnerXML($option);
+                    $options[] = htmlspecialchars_decode($this->getInnerXML($option), ENT_QUOTES);
                 }
             }
         }

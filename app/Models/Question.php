@@ -12,7 +12,8 @@ class Question extends Model
         'secondary_subcategory_id',
         'question_type',
         'xml_content',
-        'correct_answer_string'
+        'correct_answer_string',
+        'sibling_group_id'
     ];
 
     public function primarySubcategory(): BelongsTo

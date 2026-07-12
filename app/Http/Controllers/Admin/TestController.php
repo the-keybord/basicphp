@@ -34,29 +34,57 @@ class TestController extends Controller
             'name' => 'required|string|max:255',
             'duration_minutes' => 'required|integer|min:1',
             'questions' => 'required|array', // subcategory_id => count
+            'ignore_siblings' => 'nullable|boolean',
         ]);
 
         $questionIds = [];
+        $drawnSiblingGroupIds = [];
+        $ignoreSiblings = $request->boolean('ignore_siblings');
 
         foreach ($request->questions as $subId => $count) {
             $count = intval($count);
             if ($count > 0) {
                 // Fetch random questions matching either primary or secondary subcategory
-                $query = Question::where(function ($q) use ($subId) {
+                $candidates = Question::where(function ($q) use ($subId) {
                     $q->where('primary_subcategory_id', $subId)
                       ->orWhere('secondary_subcategory_id', $subId);
-                });
+                })
+                ->whereNotIn('id', $questionIds)
+                ->inRandomOrder()
+                ->get();
 
-                if (!empty($questionIds)) {
-                    $query->whereNotIn('id', $questionIds);
+                $addedInThisSub = 0;
+                $skippedCandidates = [];
+
+                foreach ($candidates as $candidate) {
+                    if ($addedInThisSub >= $count) {
+                        break;
+                    }
+
+                    // Skip if a sibling from this group is already in the test (unless ignore_siblings is checked)
+                    if (!$ignoreSiblings && $candidate->sibling_group_id !== null && in_array($candidate->sibling_group_id, $drawnSiblingGroupIds)) {
+                        $skippedCandidates[] = $candidate;
+                        continue;
+                    }
+
+                    $questionIds[] = $candidate->id;
+                    if ($candidate->sibling_group_id !== null) {
+                        $drawnSiblingGroupIds[] = $candidate->sibling_group_id;
+                    }
+                    $addedInThisSub++;
                 }
 
-                $ids = $query->inRandomOrder()
-                    ->take($count)
-                    ->pluck('id')
-                    ->toArray();
-
-                $questionIds = array_unique(array_merge($questionIds, $ids));
+                // Fallback: If we couldn't fulfill the count due to sibling constraints,
+                // draw from skipped candidates to satisfy user selection limit.
+                if ($addedInThisSub < $count && !empty($skippedCandidates)) {
+                    foreach ($skippedCandidates as $candidate) {
+                        if ($addedInThisSub >= $count) {
+                            break;
+                        }
+                        $questionIds[] = $candidate->id;
+                        $addedInThisSub++;
+                    }
+                }
             }
         }
 

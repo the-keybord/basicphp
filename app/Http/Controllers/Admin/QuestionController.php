@@ -271,4 +271,167 @@ class QuestionController extends Controller
 
         return $jpeg;
     }
+
+    public function siblings()
+    {
+        // Load all active questions grouped by Category
+        $categories = Category::with(['subcategories.primaryQuestions' => function($query) {
+            $query->with('primarySubcategory')->select('id', 'primary_subcategory_id', 'question_type', 'xml_content', 'sibling_group_id');
+        }])->get();
+
+        $proposals = [];
+
+        // Load ignored sibling pairs
+        $ignored = \DB::table('ignored_sibling_pairs')->get();
+        $ignoredMap = [];
+        foreach ($ignored as $row) {
+            $ignoredMap[$row->question_id_1][$row->question_id_2] = true;
+            $ignoredMap[$row->question_id_2][$row->question_id_1] = true;
+        }
+
+        foreach ($categories as $category) {
+            // Gather all questions belonging to this Category
+            $questions = collect();
+            foreach ($category->subcategories as $sub) {
+                $questions = $questions->concat($sub->primaryQuestions);
+            }
+
+            $count = $questions->count();
+            if ($count < 2) {
+                continue;
+            }
+
+            // Pre-calculate stripped texts to save parsing overhead
+            $strippedTexts = [];
+            foreach ($questions as $q) {
+                $strippedTexts[$q->id] = $this->getStrippedText($q->xml_content);
+            }
+
+            // Compare all combinations in this Category
+            for ($i = 0; $i < $count; $i++) {
+                for ($j = $i + 1; $j < $count; $j++) {
+                    $q1 = $questions[$i];
+                    $q2 = $questions[$j];
+
+                    // Determine if already linked in the same sibling group
+                    $isLinked = ($q1->sibling_group_id !== null && $q1->sibling_group_id === $q2->sibling_group_id);
+
+                    // Skip if they are in ignored_sibling_pairs (only check if they are not already linked)
+                    if (!$isLinked && (isset($ignoredMap[$q1->id][$q2->id]) || isset($ignoredMap[$q2->id][$q1->id]))) {
+                        continue;
+                    }
+
+                    $text1 = $strippedTexts[$q1->id];
+                    $text2 = $strippedTexts[$q2->id];
+
+                    if (empty($text1) || empty($text2)) {
+                        continue;
+                    }
+
+                    similar_text($text1, $text2, $percent);
+
+                    if ($isLinked || $percent >= 75) {
+                        $proposals[] = [
+                            'q1' => $q1,
+                            'q2' => $q2,
+                            'similarity' => round($percent),
+                            'text1' => mb_strimwidth($text1, 0, 150, '...'),
+                            'text2' => mb_strimwidth($text2, 0, 150, '...'),
+                            'category_name' => $category->name,
+                            'q1_sub_name' => $q1->primarySubcategory->name ?? 'None',
+                            'q2_sub_name' => $q2->primarySubcategory->name ?? 'None',
+                            'is_linked' => $isLinked,
+                        ];
+                    }
+                }
+            }
+        }
+
+        // Sort proposals: unlinked matches first, then linked matches. Inside each sort by similarity desc.
+        usort($proposals, function($a, $b) {
+            if ($a['is_linked'] !== $b['is_linked']) {
+                return $a['is_linked'] ? 1 : -1;
+            }
+            return $b['similarity'] <=> $a['similarity'];
+        });
+
+        return view('admin.questions.siblings', compact('proposals'));
+    }
+
+    public function acceptSibling(Request $request)
+    {
+        $validated = $request->validate([
+            'q1_id' => 'required|exists:questions,id',
+            'q2_id' => 'required|exists:questions,id',
+        ]);
+
+        $q1 = Question::findOrFail($validated['q1_id']);
+        $q2 = Question::findOrFail($validated['q2_id']);
+
+        if ($q1->sibling_group_id !== null && $q2->sibling_group_id !== null) {
+            // Merge both groups to group 1
+            $oldGroup2 = $q2->sibling_group_id;
+            Question::where('sibling_group_id', $oldGroup2)->update([
+                'sibling_group_id' => $q1->sibling_group_id
+            ]);
+        } elseif ($q1->sibling_group_id !== null) {
+            $q2->update(['sibling_group_id' => $q1->sibling_group_id]);
+        } elseif ($q2->sibling_group_id !== null) {
+            $q1->update(['sibling_group_id' => $q2->sibling_group_id]);
+        } else {
+            $newGroupId = (Question::max('sibling_group_id') ?? 0) + 1;
+            $q1->update(['sibling_group_id' => $newGroupId]);
+            $q2->update(['sibling_group_id' => $newGroupId]);
+        }
+
+        return back()->with('success', 'Questions linked as siblings successfully!');
+    }
+
+    public function rejectSibling(Request $request)
+    {
+        $validated = $request->validate([
+            'q1_id' => 'required|exists:questions,id',
+            'q2_id' => 'required|exists:questions,id',
+        ]);
+
+        $id1 = min($validated['q1_id'], $validated['q2_id']);
+        $id2 = max($validated['q1_id'], $validated['q2_id']);
+
+        \DB::table('ignored_sibling_pairs')->updateOrInsert([
+            'question_id_1' => $id1,
+            'question_id_2' => $id2,
+        ], [
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return back()->with('success', 'Sibling recommendation dismissed.');
+    }
+
+    public function unpairSibling(Request $request)
+    {
+        $validated = $request->validate([
+            'q1_id' => 'required|exists:questions,id',
+            'q2_id' => 'required|exists:questions,id',
+        ]);
+
+        $q1 = Question::findOrFail($validated['q1_id']);
+        $q2 = Question::findOrFail($validated['q2_id']);
+
+        $q1->update(['sibling_group_id' => null]);
+        $q2->update(['sibling_group_id' => null]);
+
+        return back()->with('success', 'Questions unpaired successfully!');
+    }
+
+    private function getStrippedText($xmlContent)
+    {
+        $parser = new QuestionParser();
+        try {
+            $parsed = $parser->parse($xmlContent);
+            return trim(strip_tags($parsed['text'] ?? ''));
+        } catch (\Exception $e) {
+            return trim(strip_tags($xmlContent));
+        }
+    }
 }

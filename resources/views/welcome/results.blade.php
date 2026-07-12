@@ -164,7 +164,7 @@
                             <!-- Content -->
                             <div class="p-6 md:p-8 space-y-6">
                                 <!-- Text -->
-                                <pre class="text-lg font-medium text-gray-800 leading-relaxed" style="font-family:inherit;white-space:pre-wrap;margin:0;padding:0;background:transparent;border:none;overflow:visible;">{!! $parsed['text'] !!}</pre>
+                                <div class="text-lg font-medium text-gray-800 leading-relaxed" style="font-family:inherit;white-space:pre-wrap;margin:0;padding:0;background:transparent;border:none;overflow:visible;">{!! $parsed['text'] !!}</div>
 
                                 <!-- Image Diagram -->
                                 @if(!empty($parsed['image']))
